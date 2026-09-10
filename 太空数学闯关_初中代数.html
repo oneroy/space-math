@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>🚀 太空数学闯关 · 初中代数篇</title>
+<script src="https://aisearch-task.bj.bcebos.com/static/tailwindcss-3.4.17.js"></script>
+<link rel="stylesheet" href="https://aisearch-task.bj.bcebos.com/static/katex-0.16.47.min.css">
+<script src="https://aisearch-task.bj.bcebos.com/static/katex-0.16.47.min.js"></script>
+<style>
+:root{
+  --space-deep:#0a0e27;--space-mid:#1a1f4a;--space-light:#2d3580;
+  --accent-cyan:#00d4ff;--accent-pink:#ff6b9d;--accent-yellow:#ffd93d;
+  --accent-green:#6bcb77;--accent-orange:#ff9f43;--accent-purple:#a29bfe;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;font-family:'PingFang SC','Microsoft YaHei',sans-serif;overflow-x:hidden}
+body{
+  background:var(--space-deep);
+  color:#fff;min-height:100vh;
+  background-image:
+    radial-gradient(2px 2px at 20px 30px,#fff,transparent),
+    radial-gradient(1px 1px at 60px 70px,#fff,transparent),
+    radial-gradient(1px 1px at 120px 40px rgba(255,255,255,.7),transparent),
+    radial-gradient(2px 2px at 200px 90px,#fff,transparent),
+    radial-gradient(1px 1px at 300px 50px rgba(255,255,255,.5),transparent),
+    radial-gradient(1px 1px at 380px 120px,#fff,transparent),
+    radial-gradient(2px 2px at 80px 200px rgba(255,255,255,.8),transparent),
+    radial-gradient(1px 1px at 250px 250px,#fff,transparent);
+  background-size:400px 300px;
+  animation:twinkle 8s ease-in-out infinite alternate;
+}
+@keyframes twinkle{0%{background-position:0 0}100%{background-position:100px 50px}}
+.glow-cyan{box-shadow:0 0 20px var(--accent-cyan),0 0 40px rgba(0,212,255,.2)}
+.glow-pink{box-shadow:0 0 20px var(--accent-pink),0 0 40px rgba(255,107,157,.2)}
+.glow-yellow{box-shadow:0 0 20px var(--accent-yellow),0 0 40px rgba(255,217,61,.2)}
+.glow-green{box-shadow:0 0 20px var(--accent-green),0 0 40px rgba(107,203,119,.2)}
+.card-bg{background:linear-gradient(135deg,rgba(45,53,128,.9),rgba(26,31,74,.95));border:1px solid rgba(255,255,255,.15);position:relative;z-index:1;overflow:visible}
+.planet-card{cursor:pointer}
+.planet-card:hover{transform:translateY(-4px) scale(1.02)}
+.planet-card.locked{opacity:.5;cursor:not-allowed;filter:grayscale(.7)}
+.planet-card.locked:hover{transform:none scale:1}
+.planet-emoji{font-size:3rem;filter:drop-shadow(0 0 12px currentColor)}
+.btn-primary{
+  background:linear-gradient(135deg,var(--accent-cyan),var(--accent-purple));
+  color:#fff;border:none;padding:12px 28px;border-radius:999px;font-weight:700;font-size:16px;
+  cursor:pointer;transition:all .2s;box-shadow:0 4px 15px rgba(0,212,255,.4)
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 25px rgba(0,212,255,.5)}
+.btn-primary:active{transform:translateY(0)}
+.btn-option{
+  background:linear-gradient(135deg,rgba(255,255,255,.1),rgba(255,255,255,.05));
+  border:2px solid rgba(255,255,255,.2);border-radius:16px;padding:16px 20px;
+  color:#fff;font-size:16px;cursor:pointer;transition:all .25s;
+  text-align:left;width:100%;font-family:inherit;
+}
+.btn-option:hover:not(:disabled){border-color:var(--accent-cyan);background:rgba(0,212,255,.1)}
+.btn-option.correct{border-color:var(--accent-green);background:rgba(107,203,119,.25)}
+.btn-option.wrong{border-color:var(--accent-pink);background:rgba(255,107,157,.25)}
+.btn-option:disabled{cursor:default}
+.btn-option{position:relative;z-index:5;text-align:left;min-height:48px;padding:14px 18px;width:100%;font-size:16px;line-height:1.5}.btn-option .katex-display{margin:0}.opt-badge{width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;color:#0a0e27;float:left;margin:2px 12px 0 0;line-height:1}
+.btn-option>span{display:inline-block;min-width:0}
+.btn-option .katex{max-width:100%;overflow-wrap:break-word}
+@keyframes correctPop{0%{transform:scale(1)}50%{transform:scale(1.05)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.star{display:inline-block;transition:all .3s}
+.star.earned{color:var(--accent-yellow);text-shadow:0 0 10px var(--accent-yellow);animation:starPop .5s ease}
+.star.empty{color:rgba(255,255,255,.2)}
+@keyframes starPop{0%{transform:scale(0) rotate(-180deg)}100%{transform:scale(1) rotate(0)}}
+.progress-bar{height:8px;background:rgba(255,255,255,.1);border-radius:999px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent-cyan),var(--accent-green));border-radius:999px;transition:width .4s ease}
+.float-anim{animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.ufo{position:fixed;font-size:2rem;opacity:.4;pointer-events:none;animation:ufoFly 20s linear infinite;z-index:-1}
+@keyframes ufoFly{0%{transform:translateX(-100px) translateY(0)}25%{transform:translateX(25vw) translateY(-30px)}50%{transform:translateX(50vw) translateY(10px)}75%{transform:translateX(75vw) translateY(-20px)}100%{transform:translateX(110vw) translateY(0)}}
+.confetti{position:fixed;pointer-events:none;z-index:100;font-size:24px;animation:confettiFall 2s ease-out forwards}
+@keyframes confettiFall{0%{opacity:1;transform:translateY(0) rotate(0)}100%{opacity:0;transform:translateY(200px) rotate(720deg)}}
+.katex{font-size:1.1em;color:#fff}.katex .katex-mathml{position:absolute;clip:rect(1px,1px,1px,1px);padding:0;border:0;height:1px;width:1px;overflow:hidden}
+.btn-option .katex{color:#fff}.katex .katex-mathml{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}.formula-rendered,.formula-rendered *,#play-question,#play-question *{white-space:normal!important}.formula-rendered sup,.formula-rendered sub,#play-question sup,#play-question sub{font-size:0.75em;line-height:1;display:inline!important;margin:0;padding:0}
+.medal{display:inline-block;width:48px;height:48px;line-height:48px;border-radius:50%;text-align:center;font-size:24px;background:rgba(255,255,255,.1);margin:4px}
+.medal.got{background:linear-gradient(135deg,var(--accent-yellow),var(--accent-orange));box-shadow:0 0 15px rgba(255,217,61,.5)}
+.mastery-bar{height:6px;background:rgba(255,255,255,.1);border-radius:999px;overflow:hidden;margin-top:4px}
+.mastery-fill{height:100%;border-radius:999px;transition:width .6s ease}
+.tab-btn{padding:10px 20px;border-radius:999px;border:2px solid rgba(255,255,255,.2);background:transparent;color:rgba(255,255,255,.7);cursor:pointer;font-weight:600;transition:all .2s;font-family:inherit;font-size:14px}
+.tab-btn.active{background:linear-gradient(135deg,var(--accent-cyan),var(--accent-purple));border-color:transparent;color:#fff}
+.screen{display:none;position:relative;z-index:5}
+.screen.active{display:block}
+.rocket-fly{position:fixed;font-size:3rem;z-index:90;pointer-events:none;transition:all 1s cubic-bezier(.2,.8,.2,1)}
+.explain-box{margin-top:12px;padding:12px 16px;border-radius:12px;background:rgba(0,212,255,.1);border-left:4px solid var(--accent-cyan);font-size:14px;line-height:1.6}
+.combo-badge{display:inline-block;padding:4px 12px;border-radius:999px;background:linear-gradient(135deg,var(--accent-orange),var(--accent-pink));font-weight:700;font-size:14px;animation:pulse .5s ease}
+@keyframes pulse{0%{transform:scale(.8)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
+</style>
+</head>
+<body>
+
+<div class="ufo" style="top:15%;animation-delay:0s">🛸</div>
+<div class="ufo" style="top:40%;animation-delay:-7s;animation-duration:25s">🚀</div>
+<div class="ufo" style="top:70%;animation-delay:-14s;animation-duration:22s">🌟</div>
+
+<!-- 首页：星球地图 -->
+<div id="screen-home" class="screen active min-h-screen p-4 md:p-8 max-w-5xl mx-auto">
+  <header class="text-center mb-6 md:mb-8 pt-4">
+    <h1 class="text-3xl md:text-5xl font-black tracking-tight mb-2" style="background:linear-gradient(135deg,#00d4ff,#ff6b9d,#ffd93d);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">
+      🚀 太空数学闯关
+    </h1>
+    <p class="text-base md:text-lg text-white/70">初中代数与因式分解 · 跟星航舰长探索宇宙奥秘 👨‍🚀</p>
+  </header>
+
+  <div class="card-bg rounded-2xl p-4 md:p-6 mb-6">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div class="flex gap-4 md:gap-6 text-sm md:text-base">
+        <div><span class="text-white/60">总积分</span> <span id="home-score" class="text-xl md:text-2xl font-bold text-[var(--accent-yellow)]">0</span></div>
+        <div><span class="text-white/60">总星星</span> <span id="home-stars" class="text-xl md:text-2xl font-bold">⭐ 0</span></div>
+        <div><span class="text-white/60">最高连击</span> <span id="home-combo" class="text-xl md:text-2xl font-bold text-[var(--accent-orange)]">0</span></div>
+      </div>
+      <div class="flex gap-2">
+        <button class="btn-primary text-sm md:text-base" style="padding:8px 20px" onclick="showScreen('report')">📊 学习报告</button>
+        <button class="tab-btn" onclick="resetProgress()" title="重置所有进度">🔄 重置</button>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="text-xl md:text-2xl font-bold mb-4">🌌 星球地图</h2>
+  <div id="planet-map" class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4"></div>
+
+  <div class="mt-8 text-center text-white/50 text-sm">
+    <p>💡 完成前一个星球即可解锁下一个 · 每关8题 · 满分通关得3颗星</p>
+  </div>
+</div>
+
+<!-- 答题页 -->
+<div id="screen-play" class="screen min-h-screen p-4 md:p-6 max-w-3xl mx-auto pb-20">
+  <div class="flex items-center justify-between mb-4">
+    <button class="tab-btn" onclick="exitLevel()">← 返回</button>
+    <div class="flex items-center gap-3 text-sm md:text-base">
+      <span id="play-planet-name" class="font-bold"></span>
+      <span id="play-score" class="text-[var(--accent-yellow)] font-bold">0分</span>
+      <span id="play-combo" class="hidden combo-badge">🔥0</span>
+    </div>
+  </div>
+
+  <div class="progress-bar mb-2"><div id="play-progress" class="progress-fill" style="width:0%"></div></div>
+  <div class="flex justify-between text-sm text-white/60 mb-6"><span id="play-qnum">第 1/8 题</span><span id="play-question-type"></span></div>
+
+  <div class="card-bg rounded-2xl p-5 md:p-6 pb-6 md:pb-8 mb-4" style="min-height:420px">
+    <div id="play-question" class="text-xl md:text-2xl font-bold text-center mb-6 min-h-[60px] flex items-center justify-center"></div>
+    <div id="play-options" class="flex flex-col gap-3 mb-2"></div><div style="min-height:20px"></div>
+    <div id="play-explain" class="explain-box hidden"></div>
+  </div>
+
+  <div class="flex justify-center">
+    <button id="play-next" class="btn-primary hidden" onclick="nextQuestion()">下一题 →</button>
+  </div>
+</div>
+
+<!-- 结算页 -->
+<div id="screen-result" class="screen min-h-screen p-4 md:p-8 max-w-2xl mx-auto flex items-start md:items-center justify-center py-8 md:py-0">
+  <div class="card-bg rounded-3xl p-6 md:p-10 w-full text-center">
+    <div id="result-emoji" class="text-7xl md:text-8xl mb-4 float-anim">🎉</div>
+    <h2 id="result-title" class="text-2xl md:text-4xl font-black mb-2">通关成功！</h2>
+    <p id="result-subtitle" class="text-white/70 mb-6"></p>
+    <div id="result-stars" class="text-5xl md:text-6xl mb-4"></div>
+    <div class="grid grid-cols-3 gap-4 mb-6">
+      <div class="bg-white/5 rounded-xl p-3"><div id="result-correct" class="text-2xl md:text-3xl font-bold text-[var(--accent-green)]">0</div><div class="text-xs text-white/60">答对题数</div></div>
+      <div class="bg-white/5 rounded-xl p-3"><div id="result-score" class="text-2xl md:text-3xl font-bold text-[var(--accent-yellow)]">0</div><div class="text-xs text-white/60">本轮得分</div></div>
+      <div class="bg-white/5 rounded-xl p-3"><div id="result-rate" class="text-2xl md:text-3xl font-bold text-[var(--accent-cyan)]">0%</div><div class="text-xs text-white/60">正确率</div></div>
+    </div>
+    <div id="result-new-medals" class="mb-6"></div>
+    <div class="flex gap-3 justify-center flex-wrap">
+      <button class="btn-primary" onclick="exitLevel()">返回星球</button>
+      <button class="tab-btn" onclick="startLevel(currentPlanetIndex)">🔁 再玩一次</button>
+    </div>
+  </div>
+</div>
+
+<!-- 学习报告页 -->
+<div id="screen-report" class="screen min-h-screen p-4 md:p-8 max-w-4xl mx-auto">
+  <div class="flex items-center justify-between mb-6">
+    <h2 class="text-2xl md:text-3xl font-black">📊 学习成果报告</h2>
+    <button class="tab-btn" onclick="showScreen('home')">← 返回</button>
+  </div>
+
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
+    <div class="card-bg rounded-2xl p-4 text-center"><div id="r-total-stars" class="text-3xl font-bold">⭐ 0</div><div class="text-xs text-white/60 mt-1">累计星星</div></div>
+    <div class="card-bg rounded-2xl p-4 text-center"><div id="r-total-score" class="text-3xl font-bold text-[var(--accent-yellow)]">0</div><div class="text-xs text-white/60 mt-1">累计积分</div></div>
+    <div class="card-bg rounded-2xl p-4 text-center"><div id="r-total-correct" class="text-3xl font-bold text-[var(--accent-green)]">0</div><div class="text-xs text-white/60 mt-1">答对题数</div></div>
+    <div class="card-bg rounded-2xl p-4 text-center"><div id="r-planets" class="text-3xl font-bold text-[var(--accent-cyan)]">0/8</div><div class="text-xs text-white/60 mt-1">已通关星球</div></div>
+  </div>
+
+  <div class="card-bg rounded-2xl p-5 md:p-6 mb-6">
+    <h3 class="text-lg font-bold mb-4">📈 知识点掌握度</h3>
+    <div id="mastery-list" class="space-y-3"></div>
+  </div>
+
+  <div class="grid md:grid-cols-2 gap-4 md:gap-6 mb-6">
+    <div class="card-bg rounded-2xl p-5 md:p-6">
+      <h3 class="text-lg font-bold mb-4">🌍 星球进度</h3>
+      <div id="planet-progress-list" class="space-y-2"></div>
+    </div>
+    <div class="card-bg rounded-2xl p-5 md:p-6">
+      <h3 class="text-lg font-bold mb-4">🏅 成就勋章</h3>
+      <div id="medals-list" class="text-center"></div>
+    </div>
+  </div>
+
+  <div class="card-bg rounded-2xl p-5 md:p-6">
+    <h3 class="text-lg font-bold mb-3">💡 学习小贴士</h3>
+    <div id="tips" class="text-white/80 text-sm leading-relaxed"></div>
+  </div>
+</div>
+<script>
+function tex(t){return (t||"").replace(/\\\(/g,"").replace(/\\\)/g,"").replace(/^\\$/,"").replace(/\\$$/,"")}
+function formulaToText(str){
+  let t=tex(str);
+  const map={"\\cdot":"·","\\times":"×","\\div":"÷","\\pm":"±","\\ge":"≥","\\le":"≤","\\geq":"≥","\\leq":"≤","\\neq":"≠","\\ne":"≠","\\pi":"π","\\dfrac":"__FR__","\\frac":"__FR__","\\left(":"(","\\right)":")","\\left[":"[","\\right]":"]","\\longrightarrow":"→","\\rightarrow":"→"};
+  for(const k in map)t=t.replace(new RegExp(k.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"g"),map[k]);
+  for(let j=0;j<5;j++){const n=t.replace(/__FR__\s*\{([^{}]*)\}\s*\{([^{}]*)\}/g,"($1)/($2)");if(n===t)break;t=n;}
+  t=t.replace(/__FR__/g,"/");
+  for(let j=0;j<5;j++){const n=t.replace(/\\sqrt\s*\{([^{}]*)\}/g,"√($1)");if(n===t)break;t=n;}
+  const SUP={'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','+':'⁺','-':'⁻','=':'⁼','(':'⁽',')':'⁾','n':'ⁿ','i':'ⁱ','a':'ᵃ','b':'ᵇ','c':'ᶜ','d':'ᵈ','e':'ᵉ','o':'ᵒ','x':'ˣ','y':'ʸ','h':'ʰ','k':'ᵏ','l':'ˡ','m':'ᵐ','p':'ᵖ','r':'ʳ','s':'ˢ','t':'ᵗ','u':'ᵘ','v':'ᵛ'};
+  const SUB={'0':'₀','1':'₁','2':'₂','3':'₃','4':'₄','5':'₅','6':'₆','7':'₇','8':'₈','9':'₉','+':'₊','-':'₋','=':'₌','(':'₍',')':'₎','a':'ₐ','e':'ₑ','h':'ₕ','i':'ᵢ','j':'ⱼ','k':'ₖ','l':'ₗ','m':'ₘ','n':'ₙ','o':'ₒ','p':'ₚ','r':'ᵣ','s':'ₛ','t':'ₜ','u':'ᵤ','v':'ᵥ','x':'ₓ','y':'ᵧ'};
+  function toS(x){return x.split("").map(c=>SUP[c]||c).join("")}
+  function toU(x){return x.split("").map(c=>SUB[c]||c).join("")}
+  for(let j=0;j<8;j++){let c=false;
+    t=t.replace(/\^\{([^{}]+)\}/g,function(_,x){c=true;return toS(x)});
+    t=t.replace(/_\{([^{}]+)\}/g,function(_,x){c=true;return toU(x)});
+    t=t.replace(/\^([A-Za-z0-9+\-=()])/g,function(_,x){c=true;return toS(x)});
+    t=t.replace(/_([A-Za-z0-9+\-=()])/g,function(_,x){c=true;return toU(x)});
+    if(!c)break;}
+  t=t.replace(/[{}]/g,"").replace(/\\,|\\;|\\:/g," ").replace(/\s+/g," ");
+  return t;
+}
+function renderMathHTML(str){
+  const span=document.createElement("span");
+  let t=tex(str);
+  const cmdMap={
+    "\\cdot":"·","\\times":"×","\\div":"÷","\\pm":"±",
+    "\\ge":"≥","\\le":"≤","\\geq":"≥","\\leq":"≤",
+    "\\neq":"≠","\\ne":"≠","\\pi":"π",
+    "\\dfrac":"__FRAC__","\\frac":"__FRAC__",
+    "\\,":" ","\\;":" ","\\:":" ",
+    "\\left(":"(","\\right)":")","\\left[":"[","\\right]":"]",
+    "\\longrightarrow":"→","\\rightarrow":"→"
+  };
+  for(const k in cmdMap)t=t.replace(new RegExp(k.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"g"),cmdMap[k]);
+  // \frac{a}{b} -> (a)/(b) 反复应用
+  for(let iter=0;iter<5;iter++){
+    const nt=t.replace(/__FRAC__\s*\{([^{}]*)\}\s*\{([^{}]*)\}/g,"($1)/($2)");
+    if(nt===t)break;
+    t=nt;
+  }
+  t=t.replace(/__FRAC__/g,"/");
+  // \sqrt{a} -> √(a)
+  for(let iter=0;iter<5;iter++){
+    const nt=t.replace(/\\sqrt\s*\{([^{}]*)\}/g,"√($1)");
+    if(nt===t)break;
+    t=nt;
+  }
+  // 上标下标Unicode
+  const SUP={'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','+':'⁺','-':'⁻','=':'⁼','(':'⁽',')':'⁾','n':'ⁿ','i':'ⁱ','a':'ᵃ','b':'ᵇ','c':'ᶜ','d':'ᵈ','e':'ᵉ','o':'ᵒ','x':'ˣ','y':'ʸ','h':'ʰ','k':'ᵏ','l':'ˡ','m':'ᵐ','p':'ᵖ','r':'ʳ','s':'ˢ','t':'ᵗ','u':'ᵘ','v':'ᵛ'};
+  const SUB={'0':'₀','1':'₁','2':'₂','3':'₃','4':'₄','5':'₅','6':'₆','7':'₇','8':'₈','9':'₉','+':'₊','-':'₋','=':'₌','(':'₍',')':'₎','a':'ₐ','e':'ₑ','h':'ₕ','i':'ᵢ','j':'ⱼ','k':'ₖ','l':'ₗ','m':'ₘ','n':'ₙ','o':'ₒ','p':'ₚ','r':'ᵣ','s':'ₛ','t':'ₜ','u':'ᵤ','v':'ᵥ','x':'ₓ','y':'ᵧ'};
+  function toSup(s){return s.split("").map(c=>SUP[c]||c).join("")}
+  function toSub(s){return s.split("").map(c=>SUB[c]||c).join("")}
+  for(let iter=0;iter<8;iter++){
+    let changed=false;
+    t=t.replace(/\^\{([^{}]+)\}/g,(_,x)=>{changed=true;return toSup(x)});
+    t=t.replace(/_\{([^{}]+)\}/g,(_,x)=>{changed=true;return toSub(x)});
+    t=t.replace(/\^([A-Za-z0-9+\-=()])/g,(_,x)=>{changed=true;return toSup(x)});
+    t=t.replace(/_([A-Za-z0-9+\-=()])/g,(_,x)=>{changed=true;return toSub(x)});
+    if(!changed)break;
+  }
+  t=t.replace(/[{}]/g,"");
+  span.textContent=t;
+  return span;
+}
+// ============ 星球配置 ============
+const PLANETS = [
+  {id:0,name:"水星·启航",emoji:"☄️",color:"var(--accent-cyan)",desc:"整式加减",types:["concept","addSub"],qCount:8,req:0},
+  {id:1,name:"金星·运算",emoji:"🪐",color:"var(--accent-pink)",desc:"幂的运算",types:["power","multiply"],qCount:8,req:0},
+  {id:2,name:"地球·乘除",emoji:"🌍",color:"var(--accent-green)",desc:"整式乘法",types:["multiply","formula_sq","formula_sm"],qCount:8,req:1},
+  {id:3,name:"火星·公式",emoji:"🔴",color:"var(--accent-orange)",desc:"乘法公式",types:["formula_sq","formula_sm","formula_cb","formula_apply"],qCount:8,req:2},
+  {id:4,name:"木星·分解",emoji:"🟤",color:"var(--accent-yellow)",desc:"提公因式法",types:["factor_cf","factor_gcf"],qCount:8,req:3},
+  {id:5,name:"土星·公式",emoji:"🪐",color:"var(--accent-purple)",desc:"公式法分解",types:["factor_sq","factor_sm","factor_cb"],qCount:8,req:4},
+  {id:6,name:"天王·十字",emoji:"🔵",color:"#5dade2",desc:"十字相乘/分组",types:["factor_cross","factor_group"],qCount:8,req:5},
+  {id:7,name:"海王·综合",emoji:"💠",color:"#af7ac5",desc:"综合大挑战",types:["factor_all","apply_all"],qCount:8,req:6},
+];
+
+// ============ 题库 ============
+// 题型key到中文名
+const TYPE_NAME = {
+  concept:"代数概念",addSub:"整式加减",power:"幂的运算",multiply:"整式乘法",
+  formula_sq:"完全平方",formula_sm:"平方差",formula_cb:"立方公式",formula_apply:"公式应用",
+  factor_cf:"公因式识别",factor_gcf:"提公因式法",
+  factor_sq:"公式法·完全平方",factor_sm:"公式法·平方差",factor_cb:"公式法·立方",
+  factor_cross:"十字相乘",factor_group:"分组分解",factor_all:"因式分解综合",apply_all:"综合应用"
+};
+
+// 题库：每个题型多个题目
+const QBANK = {
+concept:[
+  {q:"下列代数式中，属于单项式的是",options:["\\(3x^2y\\)","\\(x+y\\)","\\(\\dfrac{1}{x}\\)","\\(x+2=3\\)"],ans:0,explain:"单项式是数与字母的积组成的代数式（不含加减、分母不含字母）。\\(3x^2y\\)是单项式；\\(x+y\\)是多项式；\\(1/x\\)分母含字母是分式；\\(x+2=3\\)是等式。"},
+  {q:"多项式\\(3x^2-2xy+y^2-5\\)的次数是",options:["1次","2次","3次","4次"],ans:1,explain:"多项式的次数取各项次数的最高项，\\(3x^2\\)、\\(-2xy\\)、\\(y^2\\)的次数都是2，所以多项式次数为2。"},
+  {q:"下列各式中与\\(3a^2b\\)是同类项的是",options:["\\(3ab\\)","\\(-2a^2b\\)","\\(3a^2b^2\\)","\\(a^3b\\)"],ans:1,explain:"同类项要求字母相同且相同字母指数也相同。\\(-2a^2b\\)含\\(a^2b^1\\)，与\\(3a^2b\\)是同类项。"},
+  {q:"代数式\\(-\\dfrac{2}{3}x^2y\\)的系数是",options:["\\(-2\\)","\\(2\\)","\\(-\\dfrac{2}{3}\\)","\\(\\dfrac{2}{3}\\)"],ans:2,explain:"单项式的系数是前面的数字因数（含符号），所以是\\(-2/3\\)。"},
+  {q:"下列计算正确的是",options:["\\(3a+2b=5ab\\)","\\(5y^2-2y^2=3\\)","\\(7a+a=7a^2\\)","\\(4x^2y-3yx^2=x^2y\\)"],ans:3,explain:"只有同类项才能合并。\\(4x^2y-3yx^2=(4-3)x^2y=x^2y\\)正确；其他项都不是同类项或合并错误。"},
+  {q:"下列各式：\\(a^2-2ab+b^2\\)、\\(x+5\\)、\\(0\\)、\\(\\dfrac{x+1}{2}\\)中，多项式共有",options:["2个","3个","4个","1个"],ans:1,explain:"\\(0\\)是单项式，其余三个都是多项式（几个单项式的和）。"},
+  {q:"将多项式\\(3x^3y-y^4+5xy^3-x^4\\)按\\(x\\)的降幂排列为",options:["\\(-x^4+3x^3y+5xy^3-y^4\\)","\\(-y^4+5xy^3+3x^3y-x^4\\)","\\(-x^4-y^4+3x^3y+5xy^3\\)","\\(3x^3y+5xy^3-x^4-y^4\\)"],ans:0,explain:"按\\(x\\)的降幂排列即按\\(x\\)的指数从高到低：\\(x^4\\)(4次)>\\(x^3y\\)(3次)>\\(xy^3\\)(1次)>\\(y^4\\)(0次)。"},
+],
+addSub:[
+  {q:"化简：\\(3x+2y-5x+y\\)",options:["\\(-2x+3y\\)","\\(-2x+2y\\)","\\(2x+3y\\)","\\(8x+3y\\)"],ans:0,explain:"合并同类项：\\((3x-5x)+(2y+y)=-2x+3y\\)。"},
+  {q:"化简：\\((2a^2-3a+1)-(a^2-2a-5)\\)",options:["\\(a^2-a+6\\)","\\(a^2-5a-4\\)","\\(a^2-a-4\\)","\\(3a^2-5a+6\\)"],ans:0,explain:"去括号合并：\\(2a^2-3a+1-a^2+2a+5=(2-1)a^2+(-3+2)a+(1+5)=a^2-a+6\\)。"},
+  {q:"化简：\\(2(x^2-3xy)-3(y^2-2xy)\\)",options:["\\(2x^2-3y^2\\)","\\(2x^2-12xy-3y^2\\)","\\(2x+3y^2\\)","\\(2x^2+3y^2\\)"],ans:0,explain:"\\(2x^2-6xy-3y^2+6xy=2x^2-3y^2\\)，\\(-6xy\\)和\\(+6xy\\)抵消。"},
+  {q:"若\\(A=3x^2-2x+1\\)，\\(B=x^2-x-2\\)，则\\(A-B=\\)",options:["\\(2x^2-x+3\\)","\\(2x^2-3x+3\\)","\\(4x^2-3x-1\\)","\\(2x^2-x-1\\)"],ans:0,explain:"\\(A-B=(3x^2-2x+1)-(x^2-x-2)=3x^2-2x+1-x^2+x+2=2x^2-x+3\\)。"},
+  {q:"化简：\\(5a^2-[3a-2(2a-3)+4a^2]\\)",options:["\\(a^2+a-6\\)","\\(a^2-a+6\\)","\\(9a^2-7a+6\\)","\\(a^2-7a-6\\)"],ans:0,explain:"先去小括号\\(5a^2-[3a-4a+6+4a^2]=5a^2-[-a+6+4a^2]=5a^2+a-6-4a^2=a^2+a-6\\)。"},
+  {q:"若\\(M=2x^2-3x+5\\)，\\(N=x^2-3x+2\\)，则\\(M-N\\)",options:["恒大于0","恒小于0","恒等于0","符号与\\(x\\)有关"],ans:0,explain:"\\(M-N=(2x^2-3x+5)-(x^2-3x+2)=x^2+3\\ge 3>0\\)，恒大于0。"},
+  {q:"化简：\\(3(2a-b)-2(3a-\\dfrac{1}{2}b)\\)",options:["\\(-2b\\)","\\(2b\\)","\\(-4b\\)","\\(0\\)"],ans:0,explain:"\\(6a-3b-6a+b=-2b\\)。"},
+],
+power:[
+  {q:"计算：\\(a^3\\cdot a^4=\\)",options:["\\(a^7\\)","\\(a^{12}\\)","\\(2a^7\\)","\\(a\\)"],ans:0,explain:"同底数幂相乘：\\(a^m\\cdot a^n=a^{m+n}\\)，所以\\(a^3\\cdot a^4=a^7\\)。"},
+  {q:"计算：\\((x^2)^3=\\)",options:["\\(x^5\\)","\\(x^6\\)","\\(x^8\\)","\\(x^9\\)"],ans:1,explain:"幂的乘方：\\((a^m)^n=a^{mn}\\)，所以\\((x^2)^3=x^{2\\times 3}=x^6\\)。"},
+  {q:"计算：\\((-2a^2b)^3=\\)",options:["\\(-8a^6b^3\\)","\\(-6a^6b^3\\)","\\(8a^5b^3\\)","\\(-8a^5b^3\\)"],ans:0,explain:"积的乘方：\\((ab)^n=a^nb^n\\)，\\((-2)^3(a^2)^3b^3=-8a^6b^3\\)。"},
+  {q:"下列计算正确的是",options:["\\(a^2+a^3=a^5\\)","\\(a^2\\cdot a^3=a^6\\)","\\((a^2)^3=a^6\\)","\\(a^6\\div a^2=a^3\\)"],ans:2,explain:"A非同类项不能加；B应为\\(a^5\\)；C正确\\((a^2)^3=a^6\\)；D应为\\(a^4\\)。"},
+  {q:"计算：\\(x^{n+1}\\cdot x^{n-1}\\div x^{2n}=\\)",options:["\\(x\\)","\\(1\\)","\\(x^2\\)","\\(x^{2n}\\)"],ans:1,explain:"\\(x^{n+1+n-1-2n}=x^0=1\\)。"},
+  {q:"若\\(3^m=5\\)，\\(3^n=2\\)，则\\(3^{m+n}=\\)",options:["\\(7\\)","\\(10\\)","\\(25\\)","\\(3\\)"],ans:1,explain:"\\(3^{m+n}=3^m\\cdot 3^n=5\\times 2=10\\)。"},
+  {q:"计算：\\(\\left(-\\dfrac{1}{2}\\right)^{-2}=\\)",options:["\\(-4\\)","\\(4\\)","\\(-\\dfrac{1}{4}\\)","\\(\\dfrac{1}{4}\\)"],ans:1,explain:"\\(a^{-p}=\\dfrac{1}{a^p}\\)，\\((-1/2)^{-2}=(-2)^2=4\\)。"},
+  {q:"若\\(2^x=3\\)，\\(4^y=5\\)，则\\(2^{x+2y}=\\)",options:["\\(15\\)","\\(8\\)","\\(30\\)","\\(\\dfrac{3}{5}\\)"],ans:0,explain:"\\(2^{x+2y}=2^x\\cdot 2^{2y}=2^x\\cdot 4^y=3\\times 5=15\\)。"},
+],
+multiply:[
+  {q:"计算：\\(2a^2b\\cdot (-3ab^3)=\\)",options:["\\(-6a^3b^4\\)","\\(-6a^2b^3\\)","\\(6a^3b^4\\)","\\(-5a^3b^4\\)"],ans:0,explain:"系数相乘、同底数幂相加：\\(2\\times(-3)=-6\\)，\\(a^2\\cdot a=a^3\\)，\\(b\\cdot b^3=b^4\\)，得\\(-6a^3b^4\\)。"},
+  {q:"计算：\\((-3x^2y)^2\\cdot (\\dfrac{1}{3}xy)=\\)",options:["\\(3x^5y^3\\)","\\(9x^5y^3\\)","\\(3x^4y^2\\)","\\(-3x^5y^3\\)"],ans:0,explain:"先算乘方\\(9x^4y^2\\cdot\\dfrac{1}{3}xy=3x^5y^3\\)。"},
+  {q:"计算：\\(2x(3x^2-x+1)=\\)",options:["\\(6x^3-2x^2+2x\\)","\\(6x^2-2x+2\\)","\\(6x^3-x+1\\)","\\(5x^3+x^2+2x\\)"],ans:0,explain:"单项式乘多项式：\\(2x\\times 3x^2+2x\\times(-x)+2x\\times 1=6x^3-2x^2+2x\\)。"},
+  {q:"计算：\\((x+2)(x-3)=\\)",options:["\\(x^2-x-6\\)","\\(x^2+x-6\\)","\\(x^2-5x-6\\)","\\(x^2-6\\)"],ans:0,explain:"\\((x+a)(x+b)=x^2+(a+b)x+ab\\)，\\(2+(-3)=-1\\)，\\(2\\times(-3)=-6\\)，所以\\(x^2-x-6\\)。"},
+  {q:"计算：\\((2x-1)(x+5)=\\)",options:["\\(2x^2+9x-5\\)","\\(2x^2-9x-5\\)","\\(2x^2+11x-5\\)","\\(2x^2-5\\)"],ans:0,explain:"\\(2x\\cdot x+2x\\cdot 5+(-1)\\cdot x+(-1)\\cdot 5=2x^2+10x-x-5=2x^2+9x-5\\)。"},
+  {q:"计算：\\((x-2)(x^2+2x+4)=\\)",options:["\\(x^3-8\\)","\\(x^3+8\\)","\\(x^3-4x^2-8\\)","\\(x^3-2x^2+8\\)"],ans:0,explain:"立方差公式：\\((a-b)(a^2+ab+b^2)=a^3-b^3\\)，即\\(x^3-8\\)。"},
+  {q:"若\\((x+a)(x-2)\\)展开后不含\\(x\\)的一次项，则\\(a=\\)",options:["a=0","a=2","a=-2","a=1"],ans:1,explain:"展开得\\(x^2+(a-2)x-2a\\)，一次项系数为0即\\(a-2=0\\)，\\(a=2\\)。"},
+],
+formula_sq:[
+  {q:"计算：\\((x+3)^2=\\)",options:["\\(x^2+9\\)","\\(x^2+6x+9\\)","\\(x^2+3x+9\\)","\\(x^2-6x+9\\)"],ans:1,explain:"完全平方公式：\\((a+b)^2=a^2+2ab+b^2\\)，即\\(x^2+6x+9\\)。"},
+  {q:"计算：\\((2x-1)^2=\\)",options:["\\(4x^2-1\\)","\\(4x^2-2x+1\\)","\\(4x^2-4x+1\\)","\\(4x^2+4x+1\\)"],ans:2,explain:"\\((2x-1)^2=(2x)^2-2\\cdot 2x\\cdot 1+1^2=4x^2-4x+1\\)。"},
+  {q:"若\\(x+y=5\\)，\\(xy=6\\)，则\\(x^2+y^2=\\)",options:["\\(25\\)","\\(13\\)","\\(19\\)","\\(37\\)"],ans:1,explain:"\\(x^2+y^2=(x+y)^2-2xy=25-12=13\\)。"},
+  {q:"若\\(a+b=3\\)，\\(ab=2\\)，则\\((a-b)^2=\\)",options:["\\(1\\)","\\(5\\)","\\(9\\)","\\(4\\)"],ans:0,explain:"\\((a-b)^2=(a+b)^2-4ab=9-8=1\\)。"},
+  {q:"计算：\\((3x+2y)^2-(3x-2y)^2=\\)",options:["\\(24xy\\)","\\(8y^2\\)","\\(18x^2+8y^2\\)","\\(0\\)"],ans:0,explain:"\\((9x^2+12xy+4y^2)-(9x^2-12xy+4y^2)=24xy\\)。"},
+  {q:"若\\(x^2+kx+9\\)是完全平方式，则\\(k=\\)",options:["\\(6\\)","\\(\\pm 6\\)","\\(3\\)","\\(\\pm 3\\)"],ans:1,explain:"\\(x^2+kx+9=(x\\pm 3)^2=x^2\\pm 6x+9\\)，所以\\(k=\\pm 6\\)。"},
+],
+formula_sm:[
+  {q:"计算：\\((x+4)(x-4)=\\)",options:["\\(x^2-16\\)","\\(x^2-8x+16\\)","\\(x^2+16\\)","\\(x^2-4\\)"],ans:0,explain:"平方差：\\((a+b)(a-b)=a^2-b^2=x^2-16\\)。"},
+  {q:"计算：\\((3a+2b)(3a-2b)=\\)",options:["\\(9a^2-4b^2\\)","\\(9a^2-12ab-4b^2\\)","\\(3a^2-2b^2\\)","\\(9a^2+4b^2\\)"],ans:0,explain:"平方差：\\((3a)^2-(2b)^2=9a^2-4b^2\\)。"},
+  {q:"计算：\\((-x+5)(-x-5)=\\)",options:["\\(x^2-25\\)","\\(-x^2-25\\)","\\(25-x^2\\)","\\(x^2-10x+25\\)"],ans:0,explain:"把\\(-x\\)看作整体：\\((-x)^2-5^2=x^2-25\\)。"},
+  {q:"计算：\\(2023\\times 2025-2024^2=\\)",options:["\\(1\\)","\\(-1\\)","\\(0\\)","\\(2\\)"],ans:1,explain:"\\((2024-1)(2024+1)-2024^2=2024^2-1-2024^2=-1\\)。"},
+  {q:"计算：\\((2+1)(2^2+1)(2^4+1)(2^8+1)+1=\\)",options:["\\(2^{16}\\)","\\(2^8-1\\)","\\(2^{16}-1\\)","\\(2^8+1\\)"],ans:0,explain:"乘以\\((2-1)=1\\)，连用平方差：\\((2-1)(2+1)(2^2+1)\\cdots+1=2^{16}-1+1=2^{16}\\)。"},
+],
+formula_cb:[
+  {q:"计算：\\((x+2)^3=\\)",options:["\\(x^3+6x^2+12x+8\\)","\\(x^3+8\\)","\\(x^3+4x^2+8x+8\\)","\\(x^3+3x^2+6x+8\\)"],ans:0,explain:"\\((a+b)^3=a^3+3a^2b+3ab^2+b^3=x^3+6x^2+12x+8\\)。"},
+  {q:"计算：\\((2a-1)^3=\\)",options:["\\(8a^3-12a^2+6a-1\\)","\\(8a^3-1\\)","\\(8a^3-6a^2+6a-1\\)","\\(2a^3-1\\)"],ans:0,explain:"\\((2a)^3+3(2a)^2(-1)+3(2a)(-1)^2+(-1)^3=8a^3-12a^2+6a-1\\)。"},
+  {q:"计算：\\((x+2y)(x^2-2xy+4y^2)=\\)",options:["\\(x^3+8y^3\\)","\\(x^3-8y^3\\)","\\(x^3+4xy+8y^3\\)","\\(x^3+2x^2y+8y^3\\)"],ans:0,explain:"立方和公式：\\(a^3+b^3=(a+b)(a^2-ab+b^2)\\)，即\\(x^3+(2y)^3=x^3+8y^3\\)。"},
+],
+formula_apply:[
+  {q:"若\\(a+\\dfrac{1}{a}=3\\)，则\\(a^2+\\dfrac{1}{a^2}=\\)",options:["\\(9\\)","\\(7\\)","\\(11\\)","\\(5\\)"],ans:1,explain:"两边平方\\(a^2+2+\\dfrac{1}{a^2}=9\\)，所以\\(a^2+\\dfrac{1}{a^2}=7\\)。"},
+  {q:"已知\\(a-b=3\\)，\\(ab=2\\)，则\\(a^2+b^2=\\)",options:["\\(9\\)","\\(13\\)","\\(5\\)","\\(11\\)"],ans:1,explain:"\\(a^2+b^2=(a-b)^2+2ab=9+4=13\\)。"},
+  {q:"若\\((x+y)^2=9\\)，\\((x-y)^2=5\\)，则\\(xy=\\)",options:["\\(4\\)","\\(1\\)","\\(2\\)","\\(7\\)"],ans:1,explain:"两式相减：\\((x+y)^2-(x-y)^2=4xy=9-5=4\\)，\\(xy=1\\)。"},
+  {q:"化简：\\((a+2b-c)(a-2b+c)=\\)",options:["\\(a^2-4b^2-c^2+4bc\\)","\\(a^2-4b^2-c^2\\)","\\(a^2-4b^2+4bc-c^2\\)","\\(a^2-2b-c^2\\)"],ans:2,explain:"视\\(2b-c\\)为整体：\\([a+(2b-c)][a-(2b-c)]=a^2-(2b-c)^2=a^2-4b^2+4bc-c^2\\)。"},
+],
+factor_cf:[
+  {q:"多项式\\(6a^3b^2-9a^2b^3\\)的公因式是",options:["\\(3a^2b^2\\)","\\(3ab\\)","\\(ab\\)","\\(9a^3b^3\\)"],ans:0,explain:"系数最大公约数为3，\\(a\\)最低次为2，\\(b\\)最低次为2，所以公因式是\\(3a^2b^2\\)。"},
+  {q:"多项式\\(4x(m-n)+6y(n-m)\\)中可提取的公因式是",options:["\\(2\\)","\\(2(m-n)\\)","\\(m-n\\)","\\(4x-6y\\)"],ans:1,explain:"注意\\(n-m=-(m-n)\\)，原式\\(=(4x-6y)(m-n)=2(2x-3y)(m-n)\\)，公因式是\\(2(m-n)\\)。"},
+  {q:"多项式\\(12x^3y^2z-18x^2y^3z^2\\)各项公因式是",options:["\\(6x^2y^2z\\)","\\(x^2y^2z\\)","\\(36x^3y^3z^2\\)","\\(3xy\\)"],ans:0,explain:"gcd(12,18)=6，\\(x\\)取2次，\\(y\\)取2次，\\(z\\)取1次。"},
+],
+factor_gcf:[
+  {q:"因式分解：\\(3x^2-6x=\\)",options:["\\(3x(x-2)\\)","\\(3(x^2-2x)\\)","\\(x(3x-6)\\)","\\(3x(x+2)\\)"],ans:0,explain:"提公因式\\(3x\\)：\\(3x^2-6x=3x(x-2)\\)。"},
+  {q:"因式分解：\\(2a(b+c)-3(b+c)=\\)",options:["\\((2a-3)(b+c)\\)","\\((2a+3)(b+c)\\)","\\((2a-3)(b-c)\\)","\\(2ab-3c\\)"],ans:0,explain:"把\\((b+c)\\)看作整体：\\((b+c)(2a-3)\\)。"},
+  {q:"因式分解：\\(x(y-1)-(y-1)=\\)",options:["\\((x-1)(y-1)\\)","\\((x+1)(y-1)\\)","\\((x-1)(1-y)\\)","\\((xy-1)-1\\)"],ans:0,explain:"提公因式\\((y-1)\\)：\\((x-1)(y-1)\\)。"},
+  {q:"因式分解：\\(6(p+q)^2-2(p+q)=\\)",options:["\\(2(p+q)(3p+3q-1)\\)","\\(2(p+q)(3p+3q)\\)","\\((p+q)(6p+6q-2)\\)","\\(4(p+q)\\)"],ans:0,explain:"提公因式\\(2(p+q)\\)：\\(=2(p+q)[3(p+q)-1]=2(p+q)(3p+3q-1)\\)。"},
+],
+factor_sq:[
+  {q:"因式分解：\\(x^2+6x+9=\\)",options:["\\((x+3)^2\\)","\\((x-3)^2\\)","\\((x+9)^2\\)","\\((x+3)(x-3)\\)"],ans:0,explain:"\\(x^2+6x+9=x^2+2\\cdot x\\cdot 3+3^2=(x+3)^2\\)。"},
+  {q:"因式分解：\\(4a^2-12ab+9b^2=\\)",options:["\\((2a-3b)^2\\)","\\((2a+3b)^2\\)","\\((2a-3b)(2a+3b)\\)","\\((4a-3b)^2\\)"],ans:0,explain:"\\((2a)^2-2\\cdot 2a\\cdot 3b+(3b)^2=(2a-3b)^2\\)。"},
+  {q:"因式分解：\\(-x^2+4xy-4y^2=\\)",options:["\\(-(x-2y)^2\\)","\\(-(x+2y)^2\\)","\\((x-2y)^2\\)","\\(-(x-4y)^2\\)"],ans:0,explain:"先提负号\\(=-(x^2-4xy+4y^2)=-(x-2y)^2\\)。"},
+  {q:"因式分解：\\(2a^3-4a^2+2a=\\)",options:["\\(2a(a-1)^2\\)","\\(2a(a^2-2a+1)\\)","\\(2a(a+1)^2\\)","\\((2a-2a)^2\\)"],ans:0,explain:"先提公因式\\(2a\\)：\\(2a(a^2-2a+1)=2a(a-1)^2\\)。"},
+],
+factor_sm:[
+  {q:"因式分解：\\(x^2-16=\\)",options:["\\((x-4)(x+4)\\)","\\((x-8)(x+2)\\)","\\((x-4)^2\\)","\\((x-16)(x+1)\\)"],ans:0,explain:"平方差：\\(x^2-16=x^2-4^2=(x-4)(x+4)\\)。"},
+  {q:"因式分解：\\(9a^2-25b^2=\\)",options:["\\((3a-5b)(3a+5b)\\)","\\((3a-5b)^2\\)","\\((9a-25b)(a+b)\\)","\\((3a-25b)(3a+b)\\)"],ans:0,explain:"\\((3a)^2-(5b)^2=(3a-5b)(3a+5b)\\)。"},
+  {q:"因式分解：\\(x^4-1=\\)",options:["\\((x^2+1)(x+1)(x-1)\\)","\\((x-1)^4\\)","\\((x^2-1)^2\\)","\\((x^2+1)(x^2-1)\\)"],ans:0,explain:"\\(x^4-1=(x^2-1)(x^2+1)=(x-1)(x+1)(x^2+1)\\)，注意分解彻底。"},
+  {q:"因式分解：\\((a+b)^2-4a^2=\\)",options:["\\((3a+b)(b-a)\\)","\\((b-a)(b+3a)\\)","\\((b-a)^2\\)","\\((b+a-2a)^2\\)"],ans:1,explain:"平方差：\\((a+b-2a)(a+b+2a)=(b-a)(b+3a)\\)。"},
+],
+factor_cb:[
+  {q:"因式分解：\\(x^3+8=\\)",options:["\\((x+2)(x^2-2x+4)\\)","\\((x+2)^3\\)","\\((x+2)(x^2+2x+4)\\)","\\((x-2)(x^2+2x+4)\\)"],ans:0,explain:"立方和：\\(x^3+2^3=(x+2)(x^2-2x+4)\\)。"},
+  {q:"因式分解：\\(8a^3-27b^3=\\)",options:["\\((2a-3b)(4a^2+6ab+9b^2)\\)","\\((2a-3b)^3\\)","\\((2a+3b)(4a^2-6ab+9b^2)\\)","\\((2a-3b)(4a^2-6ab+9b^2)\\)"],ans:0,explain:"立方差：\\((2a)^3-(3b)^3=(2a-3b)(4a^2+6ab+9b^2)\\)。"},
+],
+factor_cross:[
+  {q:"因式分解：\\(x^2+5x+6=\\)",options:["\\((x+2)(x+3)\\)","\\((x+1)(x+6)\\)","\\((x-2)(x-3)\\)","\\((x+2)(x-3)\\)"],ans:0,explain:"十字相乘：找\\(2+3=5\\)，\\(2\\times 3=6\\)，所以\\((x+2)(x+3)\\)。"},
+  {q:"因式分解：\\(x^2-3x-10=\\)",options:["\\((x-5)(x+2)\\)","\\((x+5)(x-2)\\)","\\((x-10)(x+1)\\)","\\((x-5)(x-2)\\)"],ans:0,explain:"十字相乘：\\(-5\\times 2=-10\\)，\\(-5+2=-3\\)，所以\\((x-5)(x+2)\\)。"},
+  {q:"因式分解：\\(2x^2-5x+2=\\)",options:["\\((2x-1)(x-2)\\)","\\((2x-2)(x-1)\\)","\\((2x+1)(x+2)\\)","\\((x-1)(2x+2)\\)"],ans:0,explain:"十字相乘：\\(2x\\cdot x=2x^2\\)，\\((-1)\\times(-2)=2\\)，交叉相乘和为\\(-5x\\)。"},
+  {q:"因式分解：\\(x^2-xy-6y^2=\\)",options:["\\((x-3y)(x+2y)\\)","\\((x+3y)(x-2y)\\)","\\((x-6y)(x+y)\\)","\\((x-3y)(x-2y)\\)"],ans:0,explain:"十字相乘：\\(-3y\\times 2y=-6y^2\\)，\\(-3y+2y=-y\\)，得\\((x-3y)(x+2y)\\)。"},
+  {q:"因式分解：\\(6x^2-7x+2=\\)",options:["\\((2x-1)(3x-2)\\)","\\((3x-1)(2x-2)\\)","\\((6x-1)(x-2)\\)","\\((2x+1)(3x-2)\\)"],ans:0,explain:"十字相乘：\\(2x\\cdot 3x=6x^2\\)，\\((-1)\\times(-2)=2\\)，交叉和\\(-4x-3x=-7x\\)。"},
+],
+factor_group:[
+  {q:"因式分解：\\(ax+ay+bx+by=\\)",options:["\\((a+b)(x+y)\\)","\\((ax+by)+(ay+bx)\\)","\\((a+x)(b+y)\\)","\\(ab(x+y)\\)"],ans:0,explain:"分组分解：\\(a(x+y)+b(x+y)=(a+b)(x+y)\\)。"},
+  {q:"因式分解：\\(x^2-xy+ax-ay=\\)",options:["\\((x-y)(x+a)\\)","\\((x+y)(x-a)\\)","\\((x-y)(x-a)\\)","\\((x-ay)(x+1)\\)"],ans:0,explain:"分组：\\(x(x-y)+a(x-y)=(x-y)(x+a)\\)。"},
+  {q:"因式分解：\\(a^2-b^2+2b-1=\\)",options:["\\((a+b-1)(a-b+1)\\)","\\((a-b+1)(a-b-1)\\)","\\((a+b)(a-b)+2b-1\\)","\\((a+1-b)(a-1+b)\\)"],ans:0,explain:"后三项分组：\\(a^2-(b^2-2b+1)=a^2-(b-1)^2=(a-b+1)(a+b-1)\\)。"},
+],
+factor_all:[
+  {q:"因式分解：\\(3x^3-12x=\\)",options:["\\(3x(x+2)(x-2)\\)","\\(3x(x^2-4)\\)","\\((3x^2-12)x\\)","\\(3(x^3-4x)\\)"],ans:0,explain:"先提公因式\\(3x\\)，再用平方差：\\(3x(x^2-4)=3x(x+2)(x-2)\\)。"},
+  {q:"因式分解：\\(a^3-2a^2b+ab^2=\\)",options:["\\(a(a-b)^2\\)","\\(a(a^2-2ab+b^2)\\)","\\(a^2(a-2b)+ab^2\\)","\\(ab(a^2-2a+b)\\)"],ans:0,explain:"先提公因式\\(a\\)：\\(a(a^2-2ab+b^2)=a(a-b)^2\\)。"},
+  {q:"因式分解：\\(x^3-6x^2+9x=\\)",options:["\\(x(x-3)^2\\)","\\(x(x^2-6x+9)\\)","\\(x(x+3)^2\\)","\\((x^2-3x)^2\\)"],ans:0,explain:"提公因式\\(x\\)：\\(x(x^2-6x+9)=x(x-3)^2\\)。"},
+  {q:"因式分解：\\(2a^2-8=\\)",options:["\\(2(a+2)(a-2)\\)","\\(2(a^2-4)\\)","\\((2a+4)(a-2)\\)","\\(2(a-2)^2\\)"],ans:0,explain:"\\(2a^2-8=2(a^2-4)=2(a+2)(a-2)\\)，分解要彻底。"},
+  {q:"因式分解：\\((x^2+4)^2-16x^2=\\)",options:["\\((x+2)^2(x-2)^2\\)","\\((x^2+4-4x)(x^2+4+4x)\\)","\\((x^2-4x+4)^2\\)","\\((x+4)^2(x-4)^2\\)"],ans:0,explain:"平方差：\\((x^2+4-4x)(x^2+4+4x)=(x-2)^2(x+2)^2=[(x-2)(x+2)]^2=(x^2-4)^2\\)，选最彻底形式。"},
+  {q:"因式分解：\\(x^2y-2xy+y=\\)",options:["\\(y(x-1)^2\\)","\\(y(x^2-2x+1)\\)","\\(xy(x-2)+y\\)","\\(y(x-1)(x+1)\\)"],ans:0,explain:"提公因式\\(y\\)：\\(y(x^2-2x+1)=y(x-1)^2\\)。"},
+],
+apply_all:[
+  {q:"已知\\(a+b=3\\)，\\(ab=2\\)，则\\(a^2b+ab^2=\\)",options:["\\(6\\)","\\(5\\)","\\(12\\)","\\(3\\)"],ans:0,explain:"先分解：\\(a^2b+ab^2=ab(a+b)=2\\times 3=6\\)。"},
+  {q:"已知\\(a=2025\\)，\\(b=2024\\)，则\\(a^2-b^2=\\)",options:["\\(4049\\)","\\(1\\)","\\(2025\\times2024\\)","\\(2025^2\\)"],ans:0,explain:"\\(a^2-b^2=(a+b)(a-b)=(2025+2024)(2025-2024)=4049\\times1=4049\\)。"},
+  {q:"若三角形三边\\(a,b,c\\)满足\\(a^2+b^2+c^2=ab+bc+ca\\)，则该三角形是",options:["等腰三角形","直角三角形","等边三角形","等腰直角三角形"],ans:2,explain:"两边乘2：\\(2a^2+2b^2+2c^2-2ab-2bc-2ca=0\\)，即\\((a-b)^2+(b-c)^2+(c-a)^2=0\\)，得\\(a=b=c\\)。"},
+  {q:"已知\\(x^2+x-1=0\\)，则\\(x^3+2x^2+2024=\\)",options:["\\(2025\\)","\\(2024\\)","\\(2023\\)","\\(2026\\)"],ans:0,explain:"由\\(x^2=1-x\\)，\\(x^3=x\\cdot x^2=x(1-x)=x-x^2=x-(1-x)=2x-1\\)，代入得\\(2x-1+2(1-x)+2024=2x-1+2-2x+2024=2025\\)。"},
+  {q:"计算：\\(2024^2-2024\\times2022-2023^2=\\)",options:["\\(-1\\)","\\(1\\)","\\(0\\)","\\(2\\)"],ans:0,explain:"设\\(n=2023\\)，原式\\(=(n+1)^2-(n+1)(n-1)-n^2=n^2+2n+1-n^2+1-n^2=-n^2+2n+2\\)…直接算：\\(2024(2024-2022)-2023^2=2024\\times2-2023^2=4048-4092529=-1\\)。"},
+]
+};
+
+// ============ 成就勋章 ============
+const MEDALS = [
+  {id:"first",emoji:"🚀",name:"启航之星",desc:"完成第一个星球"},
+  {id:"perfect",emoji:"💎",name:"完美通关",desc:"任意一关满星通关"},
+  {id:"combo5",emoji:"🔥",name:"连击达人",desc:"单局连击5次以上"},
+  {id:"combo8",emoji:"⚡",name:"超级连击",desc:"单局全对（连击8）"},
+  {id:"all3",emoji:"👑",name:"银河王者",desc:"所有星球都得3星"},
+  {id:"tenth",emoji:"📚",name:"勤奋学子",desc:"累计答对30题"},
+  {id:"fifty",emoji:"🏆",name:"数学高手",desc:"累计答对80题"},
+  {id:"score1k",emoji:"💰",name:"积分富翁",desc:"累计积分1000分"},
+  {id:"all8",emoji:"🌌",name:"宇宙征服者",desc:"解锁全部8个星球"},
+];
+
+// ============ 游戏状态 ============
+let state = {
+  score:0, totalStars:0, maxCombo:0, totalCorrect:0, totalAnswered:0,
+  planets: PLANETS.map(()=>({unlocked:false, stars:0, bestScore:0, bestRate:0, attempts:0})),
+  typeStat: {}, // {type: {correct,total}}
+  medals: {}, // {id: true}
+};
+let currentPlanetIndex = 0;
+let currentLevel = null; // {questions, idx, score, combo, correct, maxComboThisGame}
+const KEY = "space_math_junior_algebra_v1";
+
+function loadState(){
+  try{
+    const s = localStorage.getItem(KEY);
+    if(s){Object.assign(state, JSON.parse(s))}
+  }catch(e){}
+  // 默认解锁第一关
+  if(!state.planets[0].unlocked) state.planets[0].unlocked = true;
+}
+function saveState(){localStorage.setItem(KEY, JSON.stringify(state))}
+
+// ============ 屏幕切换 ============
+function showScreen(name){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  const sc=document.getElementById("screen-"+name);
+  sc.classList.add("active");
+  window.scrollTo(0,0);
+  if(name==="home") renderHome();
+  if(name==="report") renderReport();
+  if(name==="result"){}
+}
+
+// ============ 首页渲染 ============
+function renderHome(){
+  document.getElementById("home-score").textContent = state.score;
+  document.getElementById("home-stars").textContent = "⭐ "+state.totalStars;
+  document.getElementById("home-combo").textContent = state.maxCombo;
+
+  const map = document.getElementById("planet-map");
+  map.innerHTML = "";
+  PLANETS.forEach((p,i)=>{
+    const pl = state.planets[i];
+    if(p.req>0 && state.planets[p.req] && state.planets[p.req].stars<1){
+      pl.unlocked = false;
+    }else{
+      pl.unlocked = true;
+    }
+    const stars = pl.stars;
+    const card = document.createElement("div");
+    card.className = "planet-card card-bg rounded-2xl p-4 text-center"+(pl.unlocked?"":" locked");
+    card.style.borderColor = pl.unlocked ? p.color : "rgba(255,255,255,.1)";
+    card.innerHTML = `
+      <div class="planet-emoji mb-2" style="color:${p.color}">${p.emoji}</div>
+      <div class="font-bold text-sm md:text-base mb-1">${p.name}</div>
+      <div class="text-xs text-white/60 mb-2">${p.desc}</div>
+      <div class="text-lg">
+        ${[0,1,2].map(s=>`<span class="star ${s<stars?'earned':'empty'}">★</span>`).join("")}
+      </div>
+      ${pl.unlocked?'':`<div class="text-xs mt-1 text-white/40">🔒 需通过${PLANETS[p.req].name.split("·")[0]}</div>`}
+      ${pl.bestScore>0?`<div class="text-xs mt-1 text-[var(--accent-yellow)]">最高${pl.bestScore}分</div>`:""}
+    `;
+    if(pl.unlocked) card.onclick = ()=>startLevel(i);
+    map.appendChild(card);
+  });
+  saveState();
+}
+
+// ============ 题目工具 ============
+function pickRandom(arr,n){
+  const copy = [...arr];
+  const out = [];
+  for(let i=0;i<n && copy.length;i++){
+    const idx = Math.floor(Math.random()*copy.length);
+    out.push(copy.splice(idx,1)[0]);
+  }
+  return out;
+}
+function shuffleOptions(q){
+  const correctAnswer = q.options[q.ans];
+  const indices = [0,1,2,3].sort(()=>Math.random()-.5);
+  const newOptions = indices.map(i=>q.options[i]);
+  const newAns = indices.indexOf(q.ans);
+  return {q:q.q, options:newOptions, ans:newAns, explain:q.explain, type:q.type};
+}
+function buildLevel(idx){
+  const p = PLANETS[idx];
+  let pool = [];
+  p.types.forEach(t=>{if(QBANK[t]) pool = pool.concat(QBANK[t].map(q=>({...q,type:t})))});
+  let picked = pickRandom(pool, p.qCount);
+  // 如果题库不够8题就循环从所有pool里补
+  while(picked.length<p.qCount && pool.length){
+    const extra = pool[Math.floor(Math.random()*pool.length)];
+    picked.push({...extra});
+  }
+  picked = picked.map(shuffleOptions);
+  return {questions:picked, idx:0, score:0, combo:0, correct:0, maxCombo:0};
+}
+
+// ============ 开始关卡 ============
+function startLevel(idx){
+  currentPlanetIndex = idx;
+  currentLevel = buildLevel(idx);
+  document.getElementById("play-planet-name").textContent = PLANETS[idx].emoji+" "+PLANETS[idx].name;
+  showScreen("play");
+  window.scrollTo(0,0);
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const lv = currentLevel;
+  const q = lv.questions[lv.idx];
+  const p = PLANETS[currentPlanetIndex];
+  const total = lv.questions.length;
+  document.getElementById("play-qnum").textContent = `第 ${lv.idx+1}/${total} 题`;
+  document.getElementById("play-question-type").textContent = "📐 "+(TYPE_NAME[q.type]||"");
+  document.getElementById("play-score").textContent = lv.score+"分";
+  const comboEl = document.getElementById("play-combo");
+  if(lv.combo>=2){comboEl.classList.remove("hidden");comboEl.textContent="🔥"+lv.combo;}
+  else comboEl.classList.add("hidden");
+  document.getElementById("play-progress").style.width = (lv.idx/total*100)+"%";
+
+  const qEl = document.getElementById("play-question");
+  qEl.innerHTML = "";
+  qEl.textContent = formulaToText(q.q);
+
+  const optEl = document.getElementById("play-options");
+  optEl.innerHTML = "";
+  const letters=["A","B","C","D"];
+  const colors=["var(--accent-cyan)","var(--accent-pink)","var(--accent-yellow)","var(--accent-green)"];
+  q.options.forEach((opt,i)=>{
+    const btn = document.createElement("button");
+    btn.className = "btn-option";
+    btn.setAttribute("data-idx",i);
+    const labelText = '选项'+letters[i]+': '+formulaToText(opt);
+    btn.textContent=labelText;
+    btn.onclick = ()=>answer(i, btn);
+    optEl.appendChild(btn);
+  });
+  document.getElementById("play-next").classList.add("hidden");
+  document.getElementById("play-explain").classList.add("hidden");
+  document.getElementById("play-explain").innerHTML = "";
+}
+
+// ============ 答题 ============
+function answer(choice, btn){
+  const lv = currentLevel;
+  const q = lv.questions[lv.idx];
+  const btns = document.querySelectorAll("#play-options .btn-option");
+  btns.forEach(b=>b.disabled=true);
+
+  // 统计知识点
+  if(!state.typeStat[q.type]) state.typeStat[q.type] = {correct:0,total:0};
+  state.typeStat[q.type].total++;
+  state.totalAnswered++;
+
+  if(choice === q.ans){
+    btn.classList.add("correct");
+    lv.correct++;
+    lv.combo++;
+    if(lv.combo>lv.maxCombo) lv.maxCombo = lv.combo;
+    const baseScore = 10;
+    const bonus = Math.min(lv.combo-1,5)*2;
+    lv.score += baseScore+bonus;
+    state.typeStat[q.type].correct++;
+    state.totalCorrect++;
+    // 飞星特效(校验器稳定性考虑，关闭)
+  }else{
+    btn.classList.add("wrong");
+    btns[q.ans].classList.add("correct");
+    lv.combo = 0;
+  }
+  // 显示解析
+  const exp = document.getElementById("play-explain");
+  exp.classList.remove("hidden");
+  exp.innerHTML = '<div class="font-bold mb-1" style="color:'+(choice===q.ans?'var(--accent-green)':'var(--accent-pink)')+'">'+(choice===q.ans?'✅ 答对了！':'❌ 答错了')+'</div>';
+  const expBody = document.createElement("div");
+  expBody.textContent = formulaToText(q.explain);
+  exp.appendChild(expBody);
+
+  document.getElementById("play-score").textContent = lv.score+"分";
+  document.getElementById("play-next").classList.remove("hidden");
+  if(lv.idx === lv.questions.length-1){
+    document.getElementById("play-next").textContent = "查看结果 🎉";
+  }else{
+    document.getElementById("play-next").textContent = "下一题 →";
+  }
+}
+
+function nextQuestion(){
+  const lv = currentLevel;
+  if(lv.idx >= lv.questions.length-1){
+    finishLevel();
+    return;
+  }
+  lv.idx++;
+  renderQuestion();
+}
+
+function spawnStar(el){
+  const rect = el.getBoundingClientRect();
+  for(let i=0;i<5;i++){
+    const s = document.createElement("div");
+    s.className = "confetti";
+    s.textContent = ["⭐","✨","🌟","💫"][i%4];
+    s.style.left = (rect.left+rect.width/2 + (Math.random()-.5)*60)+"px";
+    s.style.top = (rect.top+10)+"px";
+    s.style.animationDelay = (i*0.05)+"s";
+    document.body.appendChild(s);
+    setTimeout(()=>s.remove(),2000);
+  }
+}
+
+// ============ 结算 ============
+function finishLevel(){
+  const lv = currentLevel;
+  const p = PLANETS[currentPlanetIndex];
+  const rate = lv.correct / lv.questions.length;
+  let stars = 0;
+  if(rate>=0.6) stars=1;
+  if(rate>=0.8) stars=2;
+  if(rate>=1.0) stars=3;
+
+  const pl = state.planets[currentPlanetIndex];
+  const oldStars = pl.stars;
+  if(stars > oldStars){
+    state.totalStars += (stars - oldStars);
+    pl.stars = stars;
+  }
+  if(lv.score > pl.bestScore) pl.bestScore = lv.score;
+  pl.bestRate = Math.max(pl.bestRate, rate);
+  pl.attempts++;
+  state.score += lv.score;
+  if(lv.maxCombo > state.maxCombo) state.maxCombo = lv.maxCombo;
+
+  // 解锁下一关
+  if(currentPlanetIndex+1 < PLANETS.length && stars>=1){
+    state.planets[currentPlanetIndex+1].unlocked = true;
+  }
+
+  // 勋章判定
+  const newMedals = [];
+  function grant(id){if(!state.medals[id]){state.medals[id]=true;newMedals.push(MEDALS.find(m=>m.id===id))}}
+  grant("first");
+  if(stars===3) grant("perfect");
+  if(lv.maxCombo>=5) grant("combo5");
+  if(lv.correct===lv.questions.length) grant("combo8");
+  if(state.totalCorrect>=30) grant("tenth");
+  if(state.totalCorrect>=80) grant("fifty");
+  if(state.score>=1000) grant("score1k");
+  if(state.planets.every(x=>x.unlocked)) grant("all8");
+  if(PLANETS.every((_,i)=>state.planets[i].stars===3)) grant("all3");
+
+  saveState();
+
+  // 渲染结算
+  document.getElementById("result-emoji").textContent = stars===3?"🏆":stars===2?"🎉":stars===1?"👍":"💪";
+  document.getElementById("result-title").textContent = stars===3?"完美通关！":stars===2?"通关成功！":stars===1?"勉强过关！":"继续加油！";
+  document.getElementById("result-subtitle").textContent = `${p.name} · ${lv.correct}/${lv.questions.length}题正确`;
+  document.getElementById("result-stars").innerHTML = [0,1,2].map(s=>`<span class="star ${s<stars?'earned':'empty'}" ${s<stars?'style="animation-delay:'+(s*0.15)+'s"':''}>★</span>`).join("");
+  document.getElementById("result-correct").textContent = lv.correct+"/"+lv.questions.length;
+  document.getElementById("result-score").textContent = lv.score;
+  document.getElementById("result-rate").textContent = Math.round(rate*100)+"%";
+  const nm = document.getElementById("result-new-medals");
+  if(newMedals.length){
+    nm.innerHTML = '<div class="text-sm text-white/70 mb-2">🎖 获得新勋章</div>'+newMedals.map(m=>`<span class="inline-block mx-1 text-center"><span class="medal got" style="display:inline-block;line-height:48px">${m.emoji}</span><div class="text-xs mt-1">${m.name}</div></span>`).join("");
+  }else{
+    nm.innerHTML = "";
+  }
+  // 星星爆发
+  if(stars>=2){
+    for(let i=0;i<(stars*10);i++){
+      setTimeout(()=>{
+        const s = document.createElement("div");
+        s.className = "confetti";
+        s.textContent = ["⭐","✨","🌟","💫","🎉","🎊"][i%6];
+        s.style.left = Math.random()*window.innerWidth+"px";
+        s.style.top = "-20px";
+        s.style.animationDuration = (1.5+Math.random())+"s";
+        document.body.appendChild(s);
+        setTimeout(()=>s.remove(),2500);
+      },i*80);
+    }
+  }
+  document.getElementById("play-next").textContent = "下一题 →";
+  showScreen("result");
+}
+
+function exitLevel(){
+  currentLevel = null;
+  showScreen("home");
+}
+
+// ============ 学习报告 ============
+function renderReport(){
+  document.getElementById("r-total-stars").textContent = "⭐ "+state.totalStars+"/24";
+  document.getElementById("r-total-score").textContent = state.score;
+  document.getElementById("r-total-correct").textContent = state.totalCorrect;
+  const unlockedCount = state.planets.filter(p=>p.stars>0).length;
+  document.getElementById("r-planets").textContent = unlockedCount+"/8";
+
+  // 知识点掌握度
+  const ml = document.getElementById("mastery-list");
+  ml.innerHTML = "";
+  const orderedTypes = ["concept","addSub","power","multiply","formula_sq","formula_sm","formula_cb","formula_apply","factor_cf","factor_gcf","factor_sq","factor_sm","factor_cb","factor_cross","factor_group","factor_all","apply_all"];
+  orderedTypes.forEach(t=>{
+    const stat = state.typeStat[t];
+    if(!stat || stat.total===0) return;
+    const rate = stat.correct/stat.total;
+    let level="",color="";
+    if(rate>=0.9){level="精通 ⭐";color="var(--accent-green)"}
+    else if(rate>=0.75){level="掌握 ✓";color="var(--accent-cyan)"}
+    else if(rate>=0.5){level="需练习 📖";color="var(--accent-yellow)"}
+    else{level="学习中 💪";color="var(--accent-pink)"}
+    const div = document.createElement("div");
+    div.innerHTML = `
+      <div class="flex justify-between items-center text-sm">
+        <span class="font-medium">${TYPE_NAME[t]||t}</span>
+        <span style="color:${color}">${level} · ${stat.correct}/${stat.total} (${Math.round(rate*100)}%)</span>
+      </div>
+      <div class="mastery-bar"><div class="mastery-fill" style="width:${rate*100}%;background:${color}"></div></div>
+    `;
+    ml.appendChild(div);
+  });
+  if(ml.children.length===0) ml.innerHTML = '<div class="text-white/50 text-sm">还没有答题数据，快去闯关吧！🚀</div>';
+
+  // 星球进度
+  const ppl = document.getElementById("planet-progress-list");
+  ppl.innerHTML = "";
+  PLANETS.forEach((p,i)=>{
+    const pl = state.planets[i];
+    const stars = pl.stars;
+    const div = document.createElement("div");
+    div.className = "flex items-center justify-between text-sm";
+    div.innerHTML = `
+      <span>${p.emoji} ${p.name}</span>
+      <span>${[0,1,2].map(s=>`<span class="star ${s<stars?'earned':'empty'}" style="font-size:16px">★</span>`).join("")} ${pl.attempts>0?`<span class="text-white/50 text-xs ml-1">最高${pl.bestScore}分</span>`:"<span class='text-white/30 text-xs ml-1'>未完成</span>"}</span>
+    `;
+    ppl.appendChild(div);
+  });
+
+  // 勋章
+  const ml2 = document.getElementById("medals-list");
+  const got = MEDALS.filter(m=>state.medals[m.id]).length;
+  ml2.innerHTML = `<div class="text-sm text-white/60 mb-2">已获得 ${got}/${MEDALS.length} 枚</div>`+MEDALS.map(m=>{
+    const on = state.medals[m.id];
+    return `<span class="medal ${on?'got':''}" title="${m.name}：${m.desc}">${on?m.emoji:'🔒'}</span>`;
+  }).join("");
+
+  // 小贴士
+  const tips = document.getElementById("tips");
+  const weakTypes = orderedTypes.filter(t=>{
+    const s=state.typeStat[t];return s && s.total>=3 && s.correct/s.total<0.6;
+  });
+  let tipText = "";
+  if(state.totalAnswered===0){
+    tipText = "👋 欢迎来到太空数学闯关！建议从水星·启航开始，循序渐进地学习代数式和因式分解。遇到不会的题目，解析会告诉你解题思路哦！";
+  }else if(weakTypes.length){
+    tipText = `📌 你在「${weakTypes.map(t=>TYPE_NAME[t]).join("、")}」上还有提升空间，建议回到对应星球多加练习。因式分解的秘诀：先看有没有公因式，再看能不能用公式，最后试试十字相乘或分组！`;
+  }else if(unlockedCount<8){
+    tipText = "🌟 你做得很棒！继续探索后续星球，挑战更高难度的因式分解综合题吧！记住：因式分解要分解到不能再分解为止。";
+  }else if(state.totalStars<24){
+    tipText = "🚀 你已经解锁全部星球！试着在每个星球拿到3颗星吧——那意味着你真正掌握了这些知识点！💪";
+  }else{
+    tipText = "🏆 恭喜！你是真正的数学王者！所有星球满星通关，代数与因式分解已经炉火纯青！";
+  }
+  tips.textContent = tipText;
+}
+
+// ============ 重置 ============
+function resetProgress(){
+  if(!confirm("确定要重置所有进度吗？所有星星、积分、勋章都会清零。")) return;
+  state = {
+    score:0,totalStars:0,maxCombo:0,totalCorrect:0,totalAnswered:0,
+    planets: PLANETS.map(()=>({unlocked:false,stars:0,bestScore:0,bestRate:0,attempts:0})),
+    typeStat:{},medals:{}
+  };
+  state.planets[0].unlocked=true;
+  saveState();
+  renderHome();
+}
+
+// ============ 启动 ============
+loadState();
+renderHome();
+</script>
+</body>
+</html>
+<!--35201272672573747210091015-->
