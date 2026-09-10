@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🚀 太空数学闯关</title>
+<script src="https://aisearch-task.bj.bcebos.com/static/tailwindcss-3.4.17.js"></script>
+<script src="https://aisearch-task.bj.bcebos.com/static/gsap-3.12.7.min.js"></script>
+<style>
+  :root {
+    --space-dark: #0b0e2d;
+    --space-mid: #1a1f5c;
+    --space-accent: #4f5eff;
+    --star-yellow: #ffd84d;
+    --planet-pink: #ff7eb3;
+    --planet-green: #4ee1a0;
+    --planet-orange: #ff9f43;
+    --planet-blue: #54a0ff;
+    --planet-purple: #c56cf0;
+    --rocket-red: #ff6b6b;
+  }
+  * { -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: 'PingFang SC', 'Microsoft YaHei', -apple-system, 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #0b0e2d 0%, #1a1f5c 40%, #2d1b69 80%, #0b0e2d 100%);
+    min-height: 100vh;
+    overflow-x: hidden;
+    color: white;
+    user-select: none;
+  }
+  /* 星空背景 */
+  .starfield {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 0; overflow: hidden;
+  }
+  .star {
+    position: absolute; background: white; border-radius: 50%;
+    animation: twinkle var(--dur) ease-in-out infinite alternate;
+  }
+  @keyframes twinkle {
+    0% { opacity: 0.2; transform: scale(0.8); }
+    100% { opacity: 1; transform: scale(1.2); }
+  }
+  .shooting-star {
+    position: absolute; width: 3px; height: 3px; background: white; border-radius: 50%;
+    box-shadow: 0 0 6px 2px rgba(255,255,255,0.8);
+  }
+  @keyframes shoot {
+    0% { transform: translate(0,0) rotate(-45deg); opacity:1; }
+    100% { transform: translate(-300px, 300px) rotate(-45deg); opacity:0; }
+  }
+
+  /* 通用 */
+  .screen { display: none; position: relative; z-index: 1; min-height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; }
+  .btn-primary {
+    background: linear-gradient(135deg, #ff9f43 0%, #ff6b6b 100%);
+    border: 3px solid rgba(255,255,255,0.4);
+    border-radius: 999px; color: white; font-weight: 800;
+    padding: 12px 32px; font-size: 18px; cursor: pointer;
+    box-shadow: 0 6px 0 rgba(200,80,80,0.5), 0 8px 20px rgba(255,107,107,0.4);
+    transition: all 0.15s;
+  }
+  .btn-primary:active { transform: translateY(3px); box-shadow: 0 3px 0 rgba(200,80,80,0.5); }
+  .btn-secondary {
+    background: linear-gradient(135deg, #54a0ff 0%, #4f5eff 100%);
+    border: 3px solid rgba(255,255,255,0.4);
+    border-radius: 999px; color: white; font-weight: 700;
+    padding: 10px 24px; font-size: 16px; cursor: pointer;
+    box-shadow: 0 5px 0 rgba(60,80,200,0.5), 0 6px 16px rgba(84,160,255,0.4);
+    transition: all 0.15s;
+  }
+  .btn-secondary:active { transform: translateY(2px); box-shadow: 0 3px 0 rgba(60,80,200,0.5); }
+  .btn-option {
+    background: white; border: 4px solid #e0e0ff;
+    border-radius: 16px; color: #1a1f5c; font-weight: 800;
+    font-size: 28px; cursor: pointer; padding: 14px;
+    transition: all 0.15s; min-height: 70px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 0 #c8c8e0;
+  }
+  .btn-option:hover { transform: translateY(-2px); border-color: var(--accent, #54a0ff); }
+  .btn-option:active { transform: translateY(2px); box-shadow: 0 2px 0 #c8c8e0; }
+  .btn-option.correct {
+    background: linear-gradient(135deg, #4ee1a0, #2ecc71); border-color: #27ae60; color: white;
+    animation: popCorrect 0.5s ease; box-shadow: 0 4px 0 #27ae60;
+  }
+  .btn-option.wrong {
+    background: linear-gradient(135deg, #ff7675, #d63031); border-color: #c0392b; color: white;
+    animation: shake 0.4s ease; box-shadow: 0 4px 0 #c0392b;
+  }
+  @keyframes popCorrect {
+    0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); }
+  }
+  @keyframes shake {
+    0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)}
+  }
+
+  /* 星球 */
+  .planet {
+    position: absolute; border-radius: 50%; cursor: pointer;
+    transition: transform 0.3s;
+    display: flex; align-items: center; justify-content: center; flex-direction: column;
+  }
+  .planet:hover:not(.locked) { transform: scale(1.12); }
+  .planet.locked { cursor: not-allowed; filter: grayscale(0.8) brightness(0.5); }
+  .planet.completed::after {
+    content: '⭐'; position: absolute; top: -10px; right: -10px; font-size: 28px;
+    animation: starPulse 1.5s ease infinite;
+  }
+  @keyframes starPulse {
+    0%,100% { transform: scale(1) rotate(-5deg); } 50% { transform: scale(1.2) rotate(5deg); }
+  }
+  .planet-name {
+    position: absolute; bottom: -32px; white-space: nowrap;
+    font-size: 14px; font-weight: 700; color: white;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+  }
+  .planet-body {
+    border-radius: 50%; width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; font-weight: 900; color: white;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    position: relative; overflow: hidden;
+    box-shadow: inset -10px -10px 20px rgba(0,0,0,0.3), 0 0 30px rgba(255,255,255,0.15);
+  }
+  .planet-body::before {
+    content: ''; position: absolute; top: 10%; left: 15%;
+    width: 25%; height: 20%; background: rgba(255,255,255,0.35);
+    border-radius: 50%; filter: blur(6px);
+  }
+
+  /* 浮动动画 */
+  @keyframes float {
+    0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); }
+  }
+  .float-1 { animation: float 4s ease-in-out infinite; }
+  .float-2 { animation: float 5s ease-in-out infinite; animation-delay: 0.5s; }
+  .float-3 { animation: float 6s ease-in-out infinite; animation-delay: 1s; }
+  .float-4 { animation: float 4.5s ease-in-out infinite; animation-delay: 1.5s; }
+  .float-5 { animation: float 5.5s ease-in-out infinite; animation-delay: 2s; }
+  .float-6 { animation: float 4.2s ease-in-out infinite; animation-delay: 0.8s; }
+
+  /* 火箭 */
+  @keyframes rocketFly {
+    0% { transform: translate(var(--fx), var(--fy)) rotate(var(--fr)); }
+    100% { transform: translate(var(--tx), var(--ty)) rotate(var(--tr)); }
+  }
+  .rocket {
+    position: fixed; font-size: 48px; z-index: 100; pointer-events: none;
+    filter: drop-shadow(0 0 10px rgba(255,159,67,0.8));
+  }
+
+  /* 星星奖励动画 */
+  .star-reward {
+    position: absolute; font-size: 60px; z-index: 200; pointer-events: none;
+    animation: starBurst 1.2s ease forwards;
+  }
+  @keyframes starBurst {
+    0% { transform: scale(0) rotate(0); opacity: 1; }
+    50% { transform: scale(2) rotate(180deg); opacity: 1; }
+    100% { transform: scale(0.5) translateY(-100px) rotate(360deg); opacity: 0; }
+  }
+
+  /* 进度条 */
+  .progress-track {
+    background: rgba(255,255,255,0.15); border-radius: 999px; height: 14px; overflow: hidden;
+    border: 2px solid rgba(255,255,255,0.2);
+  }
+  .progress-fill {
+    height: 100%; border-radius: 999px;
+    background: linear-gradient(90deg, #ffd84d, #ff9f43);
+    transition: width 0.5s cubic-bezier(.2,.8,.2,1);
+    box-shadow: 0 0 10px rgba(255,216,77,0.6);
+  }
+
+  /* 顶部HUD */
+  .hud-badge {
+    background: rgba(255,255,255,0.15); backdrop-filter: blur(8px);
+    border: 2px solid rgba(255,255,255,0.25);
+    border-radius: 999px; padding: 6px 14px;
+    font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 6px;
+  }
+
+  /* 题目卡片 */
+  .question-card {
+    background: linear-gradient(145deg, rgba(255,255,255,0.95), rgba(240,240,255,0.95));
+    border-radius: 28px; padding: 28px 24px; color: #1a1f5c;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4), inset 0 2px 0 rgba(255,255,255,0.8);
+    border: 4px solid rgba(255,255,255,0.6);
+  }
+
+  /* 流星连线 */
+  .connect-line {
+    position: absolute; pointer-events: none; z-index: 5;
+    stroke: rgba(255,216,77,0.4); stroke-width: 3; stroke-dasharray: 8 8;
+    fill: none;
+  }
+
+  /* 角色 */
+  .astronaut {
+    font-size: 52px; animation: astroBounce 2s ease-in-out infinite;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+  }
+  @keyframes astroBounce {
+    0%,100%{transform:translateY(0) rotate(-5deg)} 50%{transform:translateY(-10px) rotate(5deg)}
+  }
+
+  /* 成就徽章 */
+  .badge-item {
+    background: linear-gradient(145deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
+    border: 2px solid rgba(255,255,255,0.2); border-radius: 16px;
+    padding: 12px; text-align: center; backdrop-filter: blur(8px);
+  }
+  .badge-item.unlocked {
+    background: linear-gradient(145deg, rgba(255,216,77,0.3), rgba(255,159,67,0.2));
+    border-color: rgba(255,216,77,0.5);
+  }
+  .badge-item.locked-badge { opacity: 0.4; }
+
+  /* 庆祝烟花 */
+  @keyframes confetti {
+    0% { transform: translateY(0) rotate(0); opacity: 1; }
+    100% { transform: translateY(400px) rotate(720deg); opacity: 0; }
+  }
+  .confetti-piece {
+    position: fixed; width: 10px; height: 10px; z-index: 300; pointer-events: none;
+    animation: confetti 2s ease-in forwards;
+  }
+
+  /* UFO */
+  .ufo {
+    position: absolute; font-size: 36px; pointer-events: none;
+    animation: ufoFloat 8s linear infinite;
+  }
+  @keyframes ufoFloat {
+    0% { transform: translateX(-60px) translateY(0); }
+    25% { transform: translateX(25vw) translateY(-20px); }
+    50% { transform: translateX(50vw) translateY(10px); }
+    75% { transform: translateX(75vw) translateY(-10px); }
+    100% { transform: translateX(calc(100vw + 60px)) translateY(0); }
+  }
+
+  /* 反馈弹出 */
+  .feedback-toast {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
+    font-size: 80px; z-index: 250; pointer-events: none;
+    animation: toastPop 0.8s ease forwards;
+  }
+  @keyframes toastPop {
+    0% { transform: translate(-50%,-50%) scale(0) rotate(-20deg); }
+    50% { transform: translate(-50%,-50%) scale(1.2) rotate(10deg); }
+    100% { transform: translate(-50%,-50%) scale(1) rotate(0); opacity: 0; }
+  }
+
+  .glow-text {
+    text-shadow: 0 0 20px rgba(255,216,77,0.6), 0 2px 4px rgba(0,0,0,0.5);
+  }
+
+  .logic-pattern-cell {
+    width: 64px; height: 64px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px; font-weight: 800;
+    border: 3px solid rgba(0,0,0,0.1);
+  }
+
+  /* 滚动条隐藏 */
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+</head>
+<body>
+
+<!-- 星空背景 -->
+<div class="starfield" id="starfield"></div>
+
+<!-- ========== 首页 ========== -->
+<div class="screen active" id="screen-home">
+  <div class="flex-1 flex flex-col items-center justify-center px-6 py-8 relative">
+    <div class="ufo" style="top:8%; animation-delay:0s;">🛸</div>
+    <div class="text-center mb-6 relative z-10">
+      <div class="text-6xl md:text-7xl mb-2">🚀</div>
+      <h1 class="text-4xl md:text-6xl font-black glow-text tracking-wide" style="background:linear-gradient(135deg,#ffd84d,#ff9f43,#ff6b6b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
+        太空数学闯关
+      </h1>
+      <p class="text-base md:text-lg text-white/80 mt-3 font-medium">🌟 和宇航员一起探索星球，学数学！🌟</p>
+    </div>
+
+    <!-- 宇航员介绍卡片 -->
+    <div class="question-card max-w-md w-full mb-6 text-center">
+      <div class="astronaut inline-block mb-2">👨‍🚀</div>
+      <p class="text-base md:text-lg font-bold mb-1">你好，小小太空探险家！</p>
+      <p class="text-sm md:text-base text-gray-600">我是小星船长。<br>6大星球等你解锁，每个星球都有有趣的数学题哦~</p>
+    </div>
+
+    <!-- 玩家信息 -->
+    <div class="w-full max-w-md mb-4">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="text-sm font-bold text-white/90">👤 小探险家：</span>
+        <input id="playerName" type="text" placeholder="输入你的名字" maxlength="8"
+          class="flex-1 bg-white/20 border-2 border-white/30 rounded-full px-4 py-2 text-white placeholder-white/50 font-bold text-sm focus:outline-none focus:border-yellow-400" />
+      </div>
+    </div>
+
+    <!-- 数据概览 -->
+    <div class="flex gap-3 mb-6 flex-wrap justify-center">
+      <div class="hud-badge"><span>⭐</span><span id="totalStars">0</span><span class="text-yellow-300">颗星</span></div>
+      <div class="hud-badge"><span>🏆</span><span id="totalScore">0</span><span class="text-orange-300">分</span></div>
+      <div class="hud-badge"><span>🪐</span><span id="planetsDone">0</span><span>/6星球</span></div>
+    </div>
+
+    <div class="flex flex-col gap-3 w-full max-w-xs">
+      <button class="btn-primary text-xl py-4" onclick="goScreen('map')">🚀 开始探险</button>
+      <button class="btn-secondary" onclick="goScreen('report')">📊 我的学习报告</button>
+      <button class="btn-secondary" onclick="resetProgress()" style="background:linear-gradient(135deg,#a0a0b0,#808090);box-shadow:0 5px 0 rgba(100,100,120,0.5);">🔄 重新开始</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 星球地图 ========== -->
+<div class="screen" id="screen-map">
+  <!-- 顶部HUD -->
+  <div class="flex items-center justify-between px-4 py-3 sticky top-0 z-30" style="background:linear-gradient(180deg,rgba(11,14,45,0.95),transparent);">
+    <button class="hud-badge cursor-pointer" onclick="goScreen('home')">⬅️ 返回</button>
+    <div class="flex gap-2">
+      <div class="hud-badge"><span>⭐</span><span id="mapStars">0</span></div>
+      <div class="hud-badge"><span>🏆</span><span id="mapScore">0</span></div>
+    </div>
+  </div>
+
+  <div class="flex-1 px-4 py-2 relative">
+    <div class="text-center mb-4">
+      <h2 class="text-2xl md:text-3xl font-black glow-text">🗺️ 星际地图</h2>
+      <p class="text-sm text-white/70">点击星球开始闯关！</p>
+    </div>
+
+    <!-- 星球地图区域 -->
+    <div id="mapArea" class="relative w-full mx-auto" style="height: calc(100vh - 180px); max-width: 500px;">
+      <svg class="absolute inset-0 w-full h-full pointer-events-none" id="mapSvg"></svg>
+      <!-- 星球将由JS动态放置 -->
+    </div>
+  </div>
+</div>
+
+<!-- ========== 闯关游戏 ========== -->
+<div class="screen" id="screen-play">
+  <div class="flex items-center justify-between px-4 py-3" style="background:linear-gradient(180deg,rgba(11,14,45,0.95),transparent);">
+    <button class="hud-badge cursor-pointer" onclick="exitLevel()">⬅️ 返回</button>
+    <div class="text-center">
+      <div class="text-sm text-white/70 font-bold" id="levelPlanetName">星球</div>
+      <div class="text-xs text-white/50" id="levelDifficulty">难度</div>
+    </div>
+    <div class="flex gap-2">
+      <div class="hud-badge"><span>⭐</span><span id="levelStars">0</span></div>
+      <div class="hud-badge"><span>🏆</span><span id="levelScore">0</span></div>
+    </div>
+  </div>
+
+  <!-- 题目进度 -->
+  <div class="px-6 py-2">
+    <div class="flex justify-between items-center mb-1">
+      <span class="text-sm font-bold text-white/80" id="questionCounter">第 1 题 / 共 5 题</span>
+      <span class="text-sm font-bold text-yellow-300" id="questionTypeText">加法练习</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="questionProgress" style="width:0%"></div></div>
+  </div>
+
+  <div class="flex-1 flex flex-col items-center justify-center px-5 py-4 overflow-y-auto no-scrollbar">
+    <div class="question-card w-full max-w-md">
+      <!-- 题目提示图标 -->
+      <div class="flex items-center gap-2 mb-4 justify-center">
+        <span class="text-3xl" id="questionIcon">➕</span>
+        <span class="text-sm font-bold text-gray-500" id="questionHint">算一算，选一选</span>
+      </div>
+
+      <!-- 题目展示 -->
+      <div class="text-center mb-6" id="questionArea">
+        <div class="text-4xl md:text-5xl font-black mb-3" id="questionText" style="color:#1a1f5c;">1 + 1 = ?</div>
+        <!-- 图示辅助 -->
+        <div class="flex justify-center gap-1 flex-wrap" id="questionVisual"></div>
+      </div>
+
+      <!-- 选项 -->
+      <div class="grid grid-cols-2 gap-3" id="optionsArea"></div>
+
+      <!-- 填空题输入 -->
+      <div id="inputArea" class="hidden flex-col items-center gap-3">
+        <input id="answerInput" type="number" inputmode="numeric"
+          class="w-full max-w-[200px] text-center text-4xl font-black border-4 border-blue-300 rounded-2xl py-3 focus:outline-none focus:border-orange-400 text-blue-900" />
+        <button class="btn-primary w-full max-w-[200px]" onclick="submitInputAnswer()">✓ 确定</button>
+      </div>
+
+      <!-- 逻辑题特殊区 -->
+      <div id="logicArea" class="hidden"></div>
+    </div>
+
+    <!-- 反馈提示 -->
+    <div id="feedbackArea" class="mt-4 text-center hidden">
+      <div class="text-lg font-bold" id="feedbackText"></div>
+    </div>
+
+    <!-- 连对计数 -->
+    <div class="mt-4 flex gap-2 items-center">
+      <span class="text-sm text-white/70 font-bold">连对：</span>
+      <div id="streakDisplay" class="flex gap-1"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 关卡结算 ========== -->
+<div class="screen" id="screen-result">
+  <div class="flex-1 flex flex-col items-center justify-center px-6 py-8">
+    <div class="question-card w-full max-w-md text-center">
+      <div class="text-6xl mb-3" id="resultEmoji">🎉</div>
+      <h2 class="text-2xl md:text-3xl font-black mb-2" id="resultTitle" style="color:#1a1f5c;">闯关成功！</h2>
+      <p class="text-gray-600 mb-4" id="resultSubtitle">太棒了，你解锁了新星球！</p>
+
+      <!-- 星星评级 -->
+      <div class="flex justify-center gap-2 mb-4" id="starRating">
+        <span class="text-5xl">⭐</span><span class="text-5xl">⭐</span><span class="text-5xl">⭐</span>
+      </div>
+
+      <!-- 数据 -->
+      <div class="grid grid-cols-3 gap-2 mb-5">
+        <div class="bg-blue-50 rounded-xl p-3">
+          <div class="text-2xl font-black text-blue-600" id="resultCorrect">0</div>
+          <div class="text-xs text-gray-500 font-bold">答对</div>
+        </div>
+        <div class="bg-orange-50 rounded-xl p-3">
+          <div class="text-2xl font-black text-orange-600" id="resultScore">0</div>
+          <div class="text-xs text-gray-500 font-bold">得分</div>
+        </div>
+        <div class="bg-green-50 rounded-xl p-3">
+          <div class="text-2xl font-black text-green-600" id="resultStreak">0</div>
+          <div class="text-xs text-gray-500 font-bold">最长连对</div>
+        </div>
+      </div>
+
+      <!-- 鼓励语 -->
+      <div class="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-3 mb-5">
+        <p class="text-sm font-bold text-yellow-800" id="resultEncourage">继续加油！</p>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <button class="btn-primary w-full" onclick="goScreen('map')">🗺️ 返回地图</button>
+        <button class="btn-secondary w-full" onclick="retryLevel()">🔁 再玩一次</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 学习报告 ========== -->
+<div class="screen" id="screen-report">
+  <div class="flex items-center justify-between px-4 py-3" style="background:linear-gradient(180deg,rgba(11,14,45,0.95),transparent);">
+    <button class="hud-badge cursor-pointer" onclick="goScreen('home')">⬅️ 返回</button>
+    <div class="text-lg font-black glow-text">📊 学习报告</div>
+    <div style="width:70px;"></div>
+  </div>
+
+  <div class="flex-1 px-4 py-4 overflow-y-auto no-scrollbar">
+    <div class="max-w-md mx-auto space-y-4">
+      <!-- 欢迎 -->
+      <div class="question-card text-center">
+        <div class="text-4xl mb-2">👨‍🚀</div>
+        <h3 class="text-xl font-black mb-1" style="color:#1a1f5c;" id="reportName">小探险家</h3>
+        <p class="text-sm text-gray-500">你已经是厉害的数学小达人啦！</p>
+      </div>
+
+      <!-- 总体数据 -->
+      <div class="question-card">
+        <h4 class="font-black text-lg mb-3" style="color:#1a1f5c;">📈 我的成就</h4>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-gradient-to-br from-yellow-100 to-orange-100 rounded-xl p-4 text-center">
+            <div class="text-3xl mb-1">⭐</div>
+            <div class="text-2xl font-black text-orange-600" id="reportStars">0</div>
+            <div class="text-xs text-gray-600 font-bold">累计星星</div>
+          </div>
+          <div class="bg-gradient-to-br from-blue-100 to-purple-100 rounded-xl p-4 text-center">
+            <div class="text-3xl mb-1">🏆</div>
+            <div class="text-2xl font-black text-purple-600" id="reportScore">0</div>
+            <div class="text-xs text-gray-600 font-bold">累计积分</div>
+          </div>
+          <div class="bg-gradient-to-br from-green-100 to-teal-100 rounded-xl p-4 text-center">
+            <div class="text-3xl mb-1">✅</div>
+            <div class="text-2xl font-black text-teal-600" id="reportCorrect">0</div>
+            <div class="text-xs text-gray-600 font-bold">答对题数</div>
+          </div>
+          <div class="bg-gradient-to-br from-pink-100 to-red-100 rounded-xl p-4 text-center">
+            <div class="text-3xl mb-1">🪐</div>
+            <div class="text-2xl font-black text-red-600" id="reportPlanets">0</div>
+            <div class="text-xs text-gray-600 font-bold">解锁星球</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 星球进度 -->
+      <div class="question-card">
+        <h4 class="font-black text-lg mb-3" style="color:#1a1f5c;">🪐 星球进度</h4>
+        <div class="space-y-2" id="planetProgress"></div>
+      </div>
+
+      <!-- 题型掌握 -->
+      <div class="question-card">
+        <h4 class="font-black text-lg mb-3" style="color:#1a1f5c;">💪 题型掌握</h4>
+        <div class="space-y-3" id="typeMastery"></div>
+      </div>
+
+      <!-- 成就徽章 -->
+      <div class="question-card">
+        <h4 class="font-black text-lg mb-3" style="color:#1a1f5c;">🎖️ 勋章墙</h4>
+        <div class="grid grid-cols-3 gap-2" id="badgeWall"></div>
+      </div>
+
+      <div class="text-center text-white/50 text-xs py-4">继续探索，成为超级数学宇航员！🚀</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== 数据定义 ====================
+const PLANETS = [
+  {
+    id: 0, name: '水星·启航', emoji: '☄️', color: 'linear-gradient(135deg,#ffd84d,#ff9f43)',
+    bg: '#ff9f43', floatClass: 'float-1',
+    desc: '10以内加法', difficulty: '⭐ 入门',
+    types: ['add10'], questionsCount: 5,
+    pos: { x: 15, y: 75 }
+  },
+  {
+    id: 1, name: '金星·加减', emoji: '🪐', color: 'linear-gradient(135deg,#ff7eb3,#ff6b9d)',
+    bg: '#ff6b9d', floatClass: 'float-2',
+    desc: '10以内加减混合', difficulty: '⭐ 入门',
+    types: ['add10', 'sub10'], questionsCount: 5,
+    pos: { x: 45, y: 55 }
+  },
+  {
+    id: 2, name: '地球·逻辑', emoji: '🌍', color: 'linear-gradient(135deg,#4ee1a0,#2ecc71)',
+    bg: '#2ecc71', floatClass: 'float-3',
+    desc: '20以内加减+规律', difficulty: '⭐⭐ 初级',
+    types: ['add20', 'sub20', 'pattern'], questionsCount: 6,
+    pos: { x: 75, y: 70 }
+  },
+  {
+    id: 3, name: '火星·挑战', emoji: '🔴', color: 'linear-gradient(135deg,#ff6b6b,#ee5a24)',
+    bg: '#ee5a24', floatClass: 'float-4',
+    desc: '20以内加减+比大小', difficulty: '⭐⭐ 初级',
+    types: ['add20', 'sub20', 'compare'], questionsCount: 6,
+    pos: { x: 25, y: 35 }
+  },
+  {
+    id: 4, name: '木星·进阶', emoji: '🟤', color: 'linear-gradient(135deg,#f0932b,#e17055)',
+    bg: '#e17055', floatClass: 'float-5',
+    desc: '30以内加减+填空', difficulty: '⭐⭐⭐ 进阶',
+    types: ['add30', 'sub30', 'blank', 'compare'], questionsCount: 7,
+    pos: { x: 55, y: 25 }
+  },
+  {
+    id: 5, name: '土星·大师', emoji: '🪐', color: 'linear-gradient(135deg,#c56cf0,#a29bfe)',
+    bg: '#a29bfe', floatClass: 'float-6',
+    desc: '综合大挑战', difficulty: '⭐⭐⭐ 进阶',
+    types: ['add30', 'sub30', 'blank', 'pattern', 'compare'], questionsCount: 8,
+    pos: { x: 82, y: 40 }
+  }
+];
+
+const ACHIEVEMENTS = [
+  { id: 'first', emoji: '🎯', name: '初出茅庐', desc: '完成第一关', check: s => s.totalPlanetsDone >= 1 },
+  { id: 'three', emoji: '🌟', name: '星际新秀', desc: '解锁3颗星球', check: s => s.totalPlanetsDone >= 3 },
+  { id: 'all', emoji: '👑', name: '宇宙之王', desc: '解锁全部星球', check: s => s.totalPlanetsDone >= 6 },
+  { id: 'perfect', emoji: '💯', name: '完美通关', desc: '一关全对获3星', check: s => s.perfectCount >= 1 },
+  { id: 'streak5', emoji: '🔥', name: '连对高手', desc: '连续答对5题', check: s => s.maxStreak >= 5 },
+  { id: 'star10', emoji: '⭐', name: '集星达人', desc: '累计10颗星', check: s => s.totalStars >= 10 },
+  { id: 'score100', emoji: '🏅', name: '百分勇士', desc: '累计100分', check: s => s.totalScore >= 100 },
+  { id: 'q30', emoji: '📚', name: '勤学之星', desc: '答题30道', check: s => s.totalQuestions >= 30 },
+  { id: 'logic', emoji: '🧠', name: '逻辑大师', desc: '答对规律题5次', check: s => s.typeStats && s.typeStats.pattern && s.typeStats.pattern.correct >= 5 }
+];
+
+// ==================== 状态管理 ====================
+let gameState = {
+  playerName: '小探险家',
+  totalStars: 0,
+  totalScore: 0,
+  totalCorrect: 0,
+  totalQuestions: 0,
+  totalPlanetsDone: 0,
+  maxStreak: 0,
+  perfectCount: 0,
+  planets: {}, // {planetId: {completed, stars, bestScore, times}}
+  typeStats: {} // {type: {correct, total}}
+};
+
+let currentLevel = {
+  planetId: 0, questions: [], qIndex: 0,
+  correct: 0, score: 0, stars: 0, streak: 0, maxStreakThis: 0,
+  answered: false
+};
+
+function saveState() {
+  try { localStorage.setItem('spaceMathSave', JSON.stringify(gameState)); } catch(e){}
+}
+function loadState() {
+  try {
+    const s = localStorage.getItem('spaceMathSave');
+    if (s) {
+      const parsed = JSON.parse(s);
+      gameState = Object.assign(gameState, parsed);
+      if (!gameState.typeStats) gameState.typeStats = {};
+      if (!gameState.planets) gameState.planets = {};
+    }
+  } catch(e){}
+}
+function resetProgress() {
+  if(!confirm('确定要重新开始吗？所有进度将被清除。')) return;
+  gameState = {
+    playerName: '小探险家', totalStars: 0, totalScore: 0,
+    totalCorrect: 0, totalQuestions: 0, totalPlanetsDone: 0,
+    maxStreak: 0, perfectCount: 0, planets: {}, typeStats: {}
+  };
+  document.getElementById('playerName').value = '';
+  saveState();
+  updateHomeStats();
+  alert('进度已重置，开始新的太空冒险吧！🚀');
+}
+
+// ==================== 屏幕切换 ====================
+function goScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  window.scrollTo(0,0);
+  if (name === 'home') updateHomeStats();
+  if (name === 'map') renderMap();
+  if (name === 'report') renderReport();
+}
+
+function updateHomeStats() {
+  if (gameState.playerName) document.getElementById('playerName').value = gameState.playerName;
+  document.getElementById('totalStars').textContent = gameState.totalStars;
+  document.getElementById('totalScore').textContent = gameState.totalScore;
+  document.getElementById('planetsDone').textContent = gameState.totalPlanetsDone;
+}
+
+// ==================== 星空背景 ====================
+function createStarfield() {
+  const sf = document.getElementById('starfield');
+  for (let i = 0; i < 80; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random()*2.5+0.8;
+    s.style.width = size+'px'; s.style.height = size+'px';
+    s.style.left = Math.random()*100+'%';
+    s.style.top = Math.random()*100+'%';
+    s.style.setProperty('--dur', (Math.random()*2+1.5)+'s');
+    s.style.animationDelay = Math.random()*2+'s';
+    sf.appendChild(s);
+  }
+}
+
+// ==================== 题目生成 ====================
+function randInt(min, max) { return Math.floor(Math.random()*(max-min+1))+min; }
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+
+function genQuestion(type, difficulty) {
+  let q = { type, difficulty };
+  switch(type) {
+    case 'add10': {
+      const a = randInt(1,8), b = randInt(1, 10-a);
+      q.text = `${a} + ${b} = ?`; q.answer = a+b;
+      q.visual = 'emoji'; q.emojis = [['🔴',a],['🔵',b]];
+      q.hint = '数一数，加起来'; q.icon = '➕';
+      break;
+    }
+    case 'sub10': {
+      const a = randInt(2,10), b = randInt(1,a-1);
+      q.text = `${a} - ${b} = ?`; q.answer = a-b;
+      q.visual = 'subtract'; q.emojis = [['🍎',a],['❌',b]];
+      q.hint = '拿走一些，剩多少'; q.icon = '➖';
+      break;
+    }
+    case 'add20': {
+      const a = randInt(5,15), b = randInt(3, 20-a);
+      q.text = `${a} + ${b} = ?`; q.answer = a+b;
+      q.visual = 'none'; q.hint = '再挑战一下'; q.icon = '➕';
+      break;
+    }
+    case 'sub20': {
+      const a = randInt(10,20), b = randInt(3,a-2);
+      q.text = `${a} - ${b} = ?`; q.answer = a-b;
+      q.visual = 'none'; q.hint = '减法更厉害'; q.icon = '➖';
+      break;
+    }
+    case 'add30': {
+      const a = randInt(10,25), b = randInt(5, 30-a);
+      q.text = `${a} + ${b} = ?`; q.answer = a+b;
+      q.visual = 'none'; q.hint = '进阶加法'; q.icon = '➕';
+      break;
+    }
+    case 'sub30': {
+      const a = randInt(15,30), b = randInt(5,a-3);
+      q.text = `${a} - ${b} = ?`; q.answer = a-b;
+      q.visual = 'none'; q.hint = '进阶减法'; q.icon = '➖';
+      break;
+    }
+    case 'compare': {
+      const a = randInt(1,30), b = randInt(1,30);
+      const ops = ['>','<','='];
+      let op;
+      if (a>b) op='>'; else if (a<b) op='<'; else op='=';
+      const wrongOps = ops.filter(o=>o!==op);
+      q.text = `${a} ? ${b}`;
+      q.answer = op;
+      q.options = shuffle([op, ...shuffle(wrongOps).slice(0,2)]);
+      q.hint = '哪个符号对？'; q.icon = '⚖️';
+      q.isCompare = true;
+      break;
+    }
+    case 'blank': {
+      // a + ? = c 或 ? - b = c
+      if (Math.random()<0.5) {
+        const a = randInt(2,15), c = randInt(a+2, a+15);
+        q.text = `${a} + ? = ${c}`;
+        q.answer = c-a;
+      } else {
+        const b = randInt(2,15), c = randInt(3,15);
+        q.text = `? - ${b} = ${c}`;
+        q.answer = b+c;
+      }
+      q.hint = '算出问号里的数字'; q.icon = '❓';
+      q.visual = 'none';
+      break;
+    }
+    case 'pattern': {
+      // 找规律：等差序列
+      const start = randInt(1,8);
+      const step = [1,2,3][randInt(0,2)];
+      const seq = [start, start+step, start+step*2, start+step*3];
+      const missingIdx = 3;
+      q.answer = seq[missingIdx];
+      q.displaySeq = seq.map((v,i)=> i===missingIdx ? '?' : v);
+      q.text = q.displaySeq.join(' , ') + '  下一个是？';
+      q.hint = '找一找规律'; q.icon = '🔍';
+      q.visual = 'pattern'; q.pattern = q.displaySeq;
+      break;
+    }
+  }
+
+  // 生成选项
+  if (!q.isCompare && q.type !== 'compare') {
+    const opts = new Set([q.answer]);
+    while (opts.size < 4) {
+      let wrong;
+      const diff = randInt(1,3) * (Math.random()<0.5?-1:1);
+      wrong = q.answer + diff;
+      if (wrong >= 0 && wrong !== q.answer) opts.add(wrong);
+    }
+    q.options = shuffle([...opts]);
+  }
+  return q;
+}
+
+function buildQuestions(planet) {
+  const qs = [];
+  const n = planet.questionsCount;
+  const types = planet.types;
+  for (let i=0;i<n;i++) {
+    const t = types[i % types.length];
+    qs.push(genQuestion(t, planet.id));
+  }
+  return qs;
+}
+
+// ==================== 星球地图渲染 ====================
+function renderMap() {
+  document.getElementById('mapStars').textContent = gameState.totalStars;
+  document.getElementById('mapScore').textContent = gameState.totalScore;
+  const mapArea = document.getElementById('mapArea');
+  // 清除已有星球
+  mapArea.querySelectorAll('.planet').forEach(p => p.remove());
+  const svg = document.getElementById('mapSvg');
+  svg.innerHTML = '';
+
+  const isUnlocked = (id) => {
+    if (id === 0) return true;
+    return gameState.planets[id-1] && gameState.planets[id-1].completed;
+  };
+
+  // 先画连线
+  PLANETS.forEach((p,i)=>{
+    if(i<PLANETS.length-1){
+      const next = PLANETS[i+1];
+      const x1 = p.pos.x * mapArea.clientWidth / 100;
+      const y1 = p.pos.y * mapArea.clientHeight / 100;
+      const x2 = next.pos.x * mapArea.clientWidth / 100;
+      const y2 = next.pos.y * mapArea.clientHeight / 100;
+      const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+      line.setAttribute('x1',x1); line.setAttribute('y1',y1);
+      line.setAttribute('x2',x2); line.setAttribute('y2',y2);
+      line.setAttribute('class','connect-line');
+      if (isUnlocked(next.id)) line.style.stroke = 'rgba(255,216,77,0.8)';
+      svg.appendChild(line);
+    }
+  });
+
+  // 渲染星球
+  const size = window.innerWidth < 400 ? 68 : 80;
+  PLANETS.forEach((p, i)=>{
+    const unlocked = isUnlocked(p.id);
+    const completed = gameState.planets[p.id] && gameState.planets[p.id].completed;
+    const stars = gameState.planets[p.id] ? gameState.planets[p.id].stars : 0;
+
+    const el = document.createElement('div');
+    el.className = 'planet ' + p.floatClass + (unlocked ? '' : ' locked') + (completed ? ' completed' : '');
+    el.style.width = size+'px'; el.style.height = size+'px';
+    el.style.left = `calc(${p.pos.x}% - ${size/2}px)`;
+    el.style.top = `calc(${p.pos.y}% - ${size/2}px)`;
+    el.innerHTML = `
+      <div class="planet-body" style="background:${p.color};">
+        ${completed ? '⭐' : p.emoji}
+      </div>
+      <div class="planet-name">${p.name}</div>
+      ${unlocked && !completed ? `<div style="position:absolute;top:-8px;left:-8px;font-size:20px;animation:${p.floatClass} 2s infinite;">${['✨','💫','🌟'][i%3]}</div>` : ''}
+      ${completed ? `<div style="position:absolute;bottom:-50px;display:flex;gap:1px;">
+        ${[1,2,3].map(s=>`<span style="font-size:14px;${s>stars?'opacity:0.3':''}">⭐</span>`).join('')}
+      </div>` : ''}
+    `;
+    if (unlocked) {
+      el.onclick = () => startLevel(p.id);
+    }
+    mapArea.appendChild(el);
+  });
+}
+
+// ==================== 开始关卡 ====================
+function startLevel(planetId) {
+  const planet = PLANETS[planetId];
+  currentLevel = {
+    planetId, questions: buildQuestions(planet), qIndex: 0,
+    correct: 0, score: 0, stars: 0, streak: 0, maxStreakThis: 0, answered: false
+  };
+  document.getElementById('levelPlanetName').textContent = planet.emoji + ' ' + planet.name;
+  document.getElementById('levelDifficulty').textContent = planet.desc + ' · ' + planet.difficulty;
+  goScreen('play');
+  showQuestion();
+}
+
+function exitLevel() {
+  if (confirm('确定要退出本关吗？')) goScreen('map');
+}
+function retryLevel() {
+  startLevel(currentLevel.planetId);
+}
+
+// ==================== 题目展示 ====================
+function showQuestion() {
+  const q = currentLevel.questions[currentLevel.qIndex];
+  const total = currentLevel.questions.length;
+  currentLevel.answered = false;
+
+  document.getElementById('questionCounter').textContent = `第 ${currentLevel.qIndex+1} 题 / 共 ${total} 题`;
+  document.getElementById('questionProgress').style.width = ((currentLevel.qIndex)/total*100)+'%';
+  document.getElementById('questionIcon').textContent = q.icon;
+  document.getElementById('questionHint').textContent = q.hint;
+  document.getElementById('questionTypeText').textContent = getTypeName(q.type);
+  document.getElementById('questionText').textContent = q.text;
+  document.getElementById('levelStars').textContent = currentLevel.stars;
+  document.getElementById('levelScore').textContent = currentLevel.score;
+  document.getElementById('feedbackArea').classList.add('hidden');
+
+  // 可视化辅助
+  const vis = document.getElementById('questionVisual');
+  vis.innerHTML = '';
+  vis.style.display = 'none';
+  if (q.visual === 'emoji' && q.emojis) {
+    vis.style.display = 'flex';
+    q.emojis.forEach((group, gi) => {
+      for (let i=0;i<group[1];i++){
+        const s = document.createElement('span'); s.textContent=group[0]; s.className='text-2xl';
+        vis.appendChild(s);
+      }
+      if (gi===0 && q.emojis.length>1) {
+        const plus = document.createElement('span'); plus.textContent='+'; plus.className='text-2xl font-black mx-1 text-orange-500';
+        vis.appendChild(plus);
+      }
+    });
+  } else if (q.visual === 'subtract' && q.emojis) {
+    vis.style.display = 'flex';
+    for (let i=0;i<q.emojis[0][1];i++){
+      const s = document.createElement('span'); s.textContent=i<q.emojis[0][1]-q.emojis[1][1]?'🍎':'✖️'; s.className='text-2xl';
+      vis.appendChild(s);
+    }
+  } else if (q.visual === 'pattern' && q.pattern) {
+    // 不额外渲染，文字里已有
+  }
+
+  // 选项区
+  const optArea = document.getElementById('optionsArea');
+  const inputArea = document.getElementById('inputArea');
+  optArea.innerHTML = '';
+  optArea.style.display = 'grid';
+  inputArea.classList.add('hidden');
+  inputArea.classList.remove('flex');
+
+  q.options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'btn-option';
+    btn.textContent = opt;
+    btn.onclick = () => selectAnswer(btn, opt, q.answer);
+    optArea.appendChild(btn);
+  });
+
+  renderStreak();
+}
+
+function getTypeName(type) {
+  return {
+    add10: '10以内加法', sub10: '10以内减法',
+    add20: '20以内加法', sub20: '20以内减法',
+    add30: '30以内加法', sub30: '30以内减法',
+    compare: '比大小', blank: '填空', pattern: '找规律'
+  }[type] || '算术';
+}
+
+function renderStreak() {
+  const sd = document.getElementById('streakDisplay');
+  sd.innerHTML = '';
+  for (let i=0;i<5;i++) {
+    const f = document.createElement('span');
+    f.textContent = i < currentLevel.streak ? '🔥' : '⚪';
+    f.className = 'text-lg';
+    sd.appendChild(f);
+  }
+}
+
+// ==================== 答题逻辑 ====================
+function selectAnswer(btn, chosen, answer) {
+  if (currentLevel.answered) return;
+  currentLevel.answered = true;
+
+  const correct = chosen == answer;
+  const q = currentLevel.questions[currentLevel.qIndex];
+
+  // 更新题型统计
+  if (!gameState.typeStats[q.type]) gameState.typeStats[q.type] = {correct:0, total:0};
+  gameState.typeStats[q.type].total++;
+  gameState.totalQuestions++;
+
+  if (correct) {
+    btn.classList.add('correct');
+    currentLevel.correct++;
+    currentLevel.score += 10;
+    currentLevel.streak++;
+    if (currentLevel.streak > currentLevel.maxStreakThis) currentLevel.maxStreakThis = currentLevel.streak;
+    gameState.totalCorrect++;
+    gameState.typeStats[q.type].correct++;
+    showFeedback(true);
+    launchStarBurst(btn);
+  } else {
+    btn.classList.add('wrong');
+    currentLevel.streak = 0;
+    // 高亮正确答案
+    document.querySelectorAll('#optionsArea .btn-option').forEach(b => {
+      if (b.textContent == answer) {
+        setTimeout(()=>b.classList.add('correct'), 300);
+      }
+    });
+    showFeedback(false, answer);
+  }
+
+  setTimeout(nextQuestion, correct ? 900 : 1500);
+}
+
+function submitInputAnswer() {
+  const input = document.getElementById('answerInput');
+  const val = parseInt(input.value);
+  if (isNaN(val)) { input.classList.add('animate-pulse'); setTimeout(()=>input.classList.remove('animate-pulse'),500); return; }
+  selectAnswer(input.parentElement, val, currentLevel.questions[currentLevel.qIndex].answer);
+}
+
+function showFeedback(correct, answer) {
+  const fb = document.getElementById('feedbackArea');
+  const ft = document.getElementById('feedbackText');
+  fb.classList.remove('hidden');
+  if (correct) {
+    ft.innerHTML = '✅ <span style="color:#4ee1a0;">答对了！+10分</span>';
+    showToast(correct ? '🌟' : '💪');
+  } else {
+    ft.innerHTML = `❌ <span style="color:#ff6b6b;">正确答案是 ${answer}</span>`;
+    showToast('💪');
+  }
+}
+
+function showToast(emoji) {
+  const t = document.createElement('div');
+  t.className = 'feedback-toast'; t.textContent = emoji;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(), 800);
+}
+
+function launchStarBurst(el) {
+  const rect = el.getBoundingClientRect();
+  for (let i=0;i<5;i++) {
+    const s = document.createElement('div');
+    s.className = 'star-reward'; s.textContent = '⭐';
+    s.style.left = (rect.left + rect.width/2 + (Math.random()-0.5)*40) + 'px';
+    s.style.top = (rect.top + rect.height/2 + (Math.random()-0.5)*40) + 'px';
+    s.style.fontSize = (30+Math.random()*30)+'px';
+    document.body.appendChild(s);
+    setTimeout(()=>s.remove(), 1200);
+  }
+}
+
+function nextQuestion() {
+  currentLevel.qIndex++;
+  if (currentLevel.qIndex >= currentLevel.questions.length) {
+    finishLevel();
+  } else {
+    showQuestion();
+  }
+}
+
+// ==================== 关卡结算 ====================
+function finishLevel() {
+  const planet = PLANETS[currentLevel.planetId];
+  const total = currentLevel.questions.length;
+  const ratio = currentLevel.correct / total;
+
+  // 计算星星
+  let stars = 0;
+  if (ratio >= 0.6) stars = 1;
+  if (ratio >= 0.8) stars = 2;
+  if (ratio >= 1) stars = 3;
+  currentLevel.stars = stars;
+
+  // 更新全局数据
+  gameState.totalScore += currentLevel.score;
+  if (currentLevel.maxStreakThis > gameState.maxStreak) gameState.maxStreak = currentLevel.maxStreakThis;
+
+  const prevData = gameState.planets[currentLevel.planetId] || {completed:false, stars:0, bestScore:0, times:0};
+  const isNewRecord = stars > (prevData.stars||0) || currentLevel.score > (prevData.bestScore||0);
+  const firstComplete = !prevData.completed;
+  gameState.planets[currentLevel.planetId] = {
+    completed: true,
+    stars: Math.max(prevData.stars||0, stars),
+    bestScore: Math.max(prevData.bestScore||0, currentLevel.score),
+    times: (prevData.times||0) + 1
+  };
+  // 总星星按各关最高星计算
+  gameState.totalStars = Object.values(gameState.planets).reduce((s,p)=>s+(p.stars||0),0);
+  gameState.totalPlanetsDone = Object.values(gameState.planets).filter(p=>p.completed).length;
+  if (ratio >= 1 && stars === 3) gameState.perfectCount++;
+  saveState();
+
+  // 结算页面
+  document.getElementById('resultCorrect').textContent = `${currentLevel.correct}/${total}`;
+  document.getElementById('resultScore').textContent = currentLevel.score;
+  document.getElementById('resultStreak').textContent = currentLevel.maxStreakThis;
+
+  const starRating = document.getElementById('starRating');
+  starRating.innerHTML = '';
+  for (let i=0;i<3;i++) {
+    const s = document.createElement('span');
+    s.className = 'text-5xl inline-block';
+    s.textContent = '⭐';
+    s.style.opacity = i < stars ? '1' : '0.2';
+    s.style.animation = i < stars ? `starPulse 1.5s ease-in-out infinite ${i*0.2}s` : 'none';
+    starRating.appendChild(s);
+  }
+
+  if (stars === 3) {
+    document.getElementById('resultEmoji').textContent = '🏆';
+    document.getElementById('resultTitle').textContent = '完美通关！';
+    document.getElementById('resultSubtitle').textContent = '你真是个数学天才！全部答对啦！';
+    document.getElementById('resultEncourage').textContent = '🎉 太棒啦！三颗星完美通关，你是宇宙第一厉害的小数学家！';
+    launchConfetti();
+  } else if (stars === 2) {
+    document.getElementById('resultEmoji').textContent = '🎉';
+    document.getElementById('resultTitle').textContent = '闯关成功！';
+    document.getElementById('resultSubtitle').textContent = firstComplete ? `你解锁了${planet.name}！` : '表现不错哦~';
+    document.getElementById('resultEncourage').textContent = '👏 不错哦！再试一次就能拿到三颗星啦，加油！';
+    launchConfetti(15);
+  } else if (stars === 1) {
+    document.getElementById('resultEmoji').textContent = '👍';
+    document.getElementById('resultTitle').textContent = '勉强通过';
+    document.getElementById('resultSubtitle').textContent = firstComplete ? '星球已解锁，继续加油！' : '继续努力！';
+    document.getElementById('resultEncourage').textContent = '💪 已经很不错啦！多练习几次，一定能拿到更多星星！';
+  } else {
+    document.getElementById('resultEmoji').textContent = '🤔';
+    document.getElementById('resultTitle').textContent = '这次没通过';
+    document.getElementById('resultSubtitle').textContent = '没关系，再试一次！';
+    document.getElementById('resultEncourage').textContent = '🌱 数学就是在错误中学习的，再挑战一次吧，你一定可以！';
+  }
+
+  if (firstComplete && currentLevel.planetId < PLANETS.length-1) {
+    setTimeout(() => {
+      showToast('🪐');
+    }, 500);
+  }
+
+  // 检查成就解锁
+  const newAchievements = checkAchievements();
+
+  goScreen('result');
+}
+
+function launchConfetti(count=30) {
+  const colors = ['#ff6b6b','#ffd84d','#4ee1a0','#54a0ff','#c56cf0','#ff9f43'];
+  for (let i=0;i<count;i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti-piece';
+    c.style.left = Math.random()*100+'vw';
+    c.style.top = '-20px';
+    c.style.background = colors[Math.floor(Math.random()*colors.length)];
+    c.style.animationDelay = Math.random()*0.5+'s';
+    c.style.borderRadius = Math.random()<0.5 ? '50%' : '2px';
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(), 2500);
+  }
+}
+
+function checkAchievements() {
+  // 成就提示可在后续增强
+  return [];
+}
+
+// ==================== 学习报告 ====================
+function renderReport() {
+  document.getElementById('reportName').textContent = gameState.playerName || '小探险家';
+  document.getElementById('reportStars').textContent = gameState.totalStars;
+  document.getElementById('reportScore').textContent = gameState.totalScore;
+  document.getElementById('reportCorrect').textContent = gameState.totalCorrect;
+  document.getElementById('reportPlanets').textContent = gameState.totalPlanetsDone;
+
+  // 星球进度
+  const pp = document.getElementById('planetProgress');
+  pp.innerHTML = '';
+  PLANETS.forEach(p => {
+    const data = gameState.planets[p.id];
+    const done = data && data.completed;
+    const stars = data ? data.stars : 0;
+    const pct = done ? (stars/3*100) : 0;
+    const row = document.createElement('div');
+    row.innerHTML = `
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-sm font-bold" style="color:#1a1f5c;">${p.emoji} ${p.name}</span>
+        <span class="text-xs font-bold ${done?'text-orange-600':'text-gray-400'}">${done ? stars+'⭐' : '🔒 未解锁'}</span>
+      </div>
+      <div class="progress-track" style="height:8px;">
+        <div class="progress-fill" style="width:${pct}%;"></div>
+      </div>
+    `;
+    pp.appendChild(row);
+  });
+
+  // 题型掌握
+  const tm = document.getElementById('typeMastery');
+  tm.innerHTML = '';
+  const typeNames = {
+    add10:'10以内加法',sub10:'10以内减法',add20:'20以内加法',sub20:'20以内减法',
+    add30:'30以内加法',sub30:'30以内减法',compare:'比大小',blank:'填空题',pattern:'找规律'
+  };
+  const allTypes = Object.keys(typeNames);
+  let hasType = false;
+  allTypes.forEach(t => {
+    const stats = gameState.typeStats[t];
+    if (!stats || stats.total === 0) return;
+    hasType = true;
+    const rate = Math.round(stats.correct/stats.total*100);
+    const mastery = rate >= 90 ? '🌟 精通' : rate >= 70 ? '👍 掌握' : rate >= 50 ? '💪 需练习' : '📖 学习中';
+    const color = rate >= 90 ? '#2ecc71' : rate >= 70 ? '#54a0ff' : rate >= 50 ? '#ff9f43' : '#ff6b6b';
+    const row = document.createElement('div');
+    row.innerHTML = `
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-sm font-bold" style="color:#1a1f5c;">${typeNames[t]}</span>
+        <span class="text-xs font-bold" style="color:${color}">${mastery} ${rate}%</span>
+      </div>
+      <div class="progress-track" style="height:8px;">
+        <div class="progress-fill" style="width:${rate}%;background:linear-gradient(90deg,${color},${color}dd);"></div>
+      </div>
+      <div class="text-xs text-gray-500 mt-1">答对 ${stats.correct} / ${stats.total} 题</div>
+    `;
+    tm.appendChild(row);
+  });
+  if (!hasType) {
+    tm.innerHTML = '<p class="text-sm text-gray-400 text-center py-4">还没有答题记录，快开始探险吧！🚀</p>';
+  }
+
+  // 徽章墙
+  const bw = document.getElementById('badgeWall');
+  bw.innerHTML = '';
+  ACHIEVEMENTS.forEach(a => {
+    const unlocked = a.check(gameState);
+    const item = document.createElement('div');
+    item.className = 'badge-item ' + (unlocked ? 'unlocked' : 'locked-badge');
+    item.innerHTML = `
+      <div class="text-3xl mb-1">${a.emoji}</div>
+      <div class="text-xs font-black" style="color:${unlocked?'#1a1f5c':'rgba(255,255,255,0.5)'}">${a.name}</div>
+      <div class="text-[10px] mt-1" style="color:${unlocked?'#666':'rgba(255,255,255,0.3)'}">${a.desc}</div>
+    `;
+    bw.appendChild(item);
+  });
+}
+
+// ==================== 事件绑定 ====================
+document.getElementById('playerName').addEventListener('input', (e) => {
+  gameState.playerName = e.target.value.trim() || '小探险家';
+  saveState();
+});
+
+// 键盘支持
+document.addEventListener('keydown', (e) => {
+  if (document.getElementById('screen-play').classList.contains('active') && !currentLevel.answered) {
+    const opts = document.querySelectorAll('#optionsArea .btn-option');
+    const num = parseInt(e.key);
+    if (num >= 1 && num <= 4 && opts[num-1]) {
+      opts[num-1].click();
+    }
+    if (e.key === 'Enter' && document.getElementById('inputArea').classList.contains('flex')) {
+      submitInputAnswer();
+    }
+  }
+});
+
+// ==================== 初始化 ====================
+createStarfield();
+loadState();
+updateHomeStats();
+
+// 欢迎动画
+window.addEventListener('load', () => {
+  gsap.from('#screen-home h1', {y: 30, opacity: 0, duration: 0.8, ease: 'power2.out'});
+  gsap.from('#screen-home .question-card', {y: 40, opacity: 0, duration: 0.8, delay: 0.3, ease: 'power2.out'});
+});
+</script>
+</body>
+</html>
+<!--08658473032395614730091014-->
